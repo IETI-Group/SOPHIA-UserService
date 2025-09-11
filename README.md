@@ -2,7 +2,98 @@
 
 Servicio de usuarios para el proyecto SOPHIA, desarrollado con Node.js, Express, TypeScript y una arquitectura escalable.
 
-## 🚀 Tecnologías
+## � Descripción del Proyecto
+
+SOPHIA User Service es un microservicio backend diseñado para gestionar usuarios dentro del ecosistema SOPHIA. Este servicio proporciona una API RESTful robusta y escalable para operaciones relacionadas con usuarios, incluyendo autorización y gestión de perfiles. Construido con tecnologías modernas como Node.js y TypeScript, implementa mejores prácticas de desarrollo, incluyendo manejo centralizado de errores, logging estructurado, testing automatizado y contenerización con Docker.
+
+## 🔧 Versión del Lenguaje
+
+- **Node.js**: 24.x
+- **TypeScript**: 5.9.2
+
+## 📦 Dependencias Principales
+
+### Dependencias de Producción
+- **express**: ^5.1.0 - Framework web para Node.js
+- **cors**: ^2.8.5 - Middleware para Cross-Origin Resource Sharing
+- **helmet**: ^8.1.0 - Middleware de seguridad HTTP
+- **morgan**: ^1.10.1 - HTTP request logger middleware
+- **winston**: ^3.17.0 - Sistema de logging avanzado y flexible
+- **dotenv**: 17.2.2 - Carga variables de entorno desde archivo .env
+- **@types/express**: ^5.0.3 - Definiciones de tipos para Express
+
+### Dependencias de Desarrollo
+- **typescript**: 5.9.2 - Compilador y herramientas de TypeScript
+- **@biomejs/biome**: 2.2.2 - Linter, formatter y organizador de imports
+- **vitest**: 3.2.4 - Framework de testing moderno y rápido
+- **@vitest/coverage-istanbul**: 3.2.4 - Plugin de cobertura de código
+- **nodemon**: 3.1.10 - Monitor de archivos para desarrollo
+- **tsx**: 4.20.5 - Ejecutor de TypeScript en tiempo real
+- **supertest**: ^7.1.4 - Testing de endpoints HTTP
+- **typedoc**: 0.28.12 - Generador de documentación para TypeScript
+
+**Gestor de Paquetes**: pnpm@10.15.1
+
+## ⚡ Instrucciones de Instalación y Ejecución
+
+### Prerrequisitos
+- Node.js 24.x o superior
+- pnpm (recomendado) o npm
+
+### Instalación
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/IETI-Group/SOPHIA-UserService.git
+   cd SOPHIA-UserService
+   ```
+
+2. **Instalar dependencias:**
+   ```bash
+   pnpm install
+   # o usando npm
+   npm install
+   ```
+
+3. **Configurar variables de entorno:**
+   ```bash
+   cp .env.example .env
+   
+   ```
+
+### Ejecución
+
+#### Desarrollo (con hot reload)
+```bash
+pnpm dev
+```
+
+#### Producción
+```bash
+# Compilar TypeScript
+pnpm build
+
+# Ejecutar versión compilada
+pnpm start
+```
+
+#### Verificación
+- Servidor: `http://localhost:3000`
+- Health check: `http://localhost:3000/api/v1/health`
+
+## 📋 Documento de Planeación
+
+**[📊 Tablero de Planeación en Trello](https://trello.com/invite/b/68be127bf45c3eaecf8cc70d/ATTI6891bb77d37b8e0184327426470801ed6871D57B/sophia)**
+
+Este tablero contiene:
+- **Backlog del Producto**: Historias de usuario y épicas pendientes
+- **Sprint Actual**: Tareas en desarrollo y asignaciones
+- **Historias de Usuario**: Definición detallada de funcionalidades
+- **Tareas Técnicas**: Actividades de desarrollo, testing y despliegue
+- **Criterios de Aceptación**: Definición de "Terminado" para cada funcionalidad
+- **Roadmap**: Planificación temporal del desarrollo
+
+## �🚀 Tecnologías
 
 - **Node.js 24** + **TypeScript 5.9**
 - **Express 5** - Framework web para Node.js
@@ -16,28 +107,6 @@ Servicio de usuarios para el proyecto SOPHIA, desarrollado con Node.js, Express,
 - **Nodemon** - Hot reload en desarrollo
 - **Docker** - Contenerización completa
 
-## 📦 Dependencias
-
-### Producción
-
-- `express` - Framework web
-- `cors` - Middleware CORS
-- `helmet` - Middleware de seguridad
-- `morgan` - HTTP request logger
-- `winston` - Sistema de logging
-- `dotenv` - Variables de entorno
-
-### Desarrollo
-
-- `typescript` - Compilador TypeScript
-- `@types/node` + `@types/express` + `@types/cors` + `@types/morgan` - Tipos TypeScript
-- `nodemon` - Auto-restart en desarrollo
-- `tsx` - Ejecutor TypeScript directo
-- `@biomejs/biome` - Linter y formatter
-- `vitest` + `@vitest/coverage-istanbul` - Testing y cobertura
-- `supertest` + `@types/supertest` - Testing de endpoints HTTP
-- `vitest-mock-extended` - Mocking avanzado
-- `typedoc` - Generador de documentación
 
 ## 📁 Estructura del Proyecto
 
@@ -61,66 +130,6 @@ src/
 └── server.ts       # Punto de entrada
 ```
 
-## ⚙️ Configuración
-
-### Biome (`biome.json`)
-
-- ✅ Linting con reglas recomendadas
-- ✅ Formateo automático (espacios, comillas simples, semicolons)
-- ✅ Organización de imports
-- ✅ Detección de variables no usadas y `any` explícitos
-
-### TypeScript (`tsconfig.json`)
-
-- ✅ Target ES2022 con módulos NodeNext
-- ✅ Strict mode habilitado
-- ✅ Source maps y declaraciones
-- ✅ Output en directorio `dist/`
-
-## 🛠️ Scripts Disponibles
-
-```bash
-# Desarrollo
-pnpm dev          # Ejecutar con hot reload
-pnpm build        # Compilar TypeScript
-pnpm start        # Ejecutar versión compilada
-
-# Calidad de código
-pnpm format       # Formatear código
-pnpm lint         # Linter con auto-fix
-pnpm check        # Verificación completa
-
-# Testing
-pnpm test         # Ejecutar tests
-pnpm coverage     # Reporte de cobertura
-
-# Documentación
-pnpm doc          # Generar documentación
-```
-
-## � Inicio Rápido
-
-1. **Instalar dependencias:**
-
-   ```bash
-   pnpm install
-   ```
-
-2. **Configurar variables de entorno:**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-3. **Ejecutar en modo desarrollo:**
-
-   ```bash
-   pnpm dev
-   ```
-
-4. **Verificar que funciona:**
-   - Visita: `http://localhost:3000`
-   - Health check: `http://localhost:3000/api/v1/health`
 
 ## 📡 Endpoints Disponibles
 
@@ -146,35 +155,6 @@ Respuesta exitosa:
 }
 ```
 
-### Información General
-
-- **GET** `/` - Información general del servicio
-
-## 🔧 Características
-
-### ✅ Implementado
-
-- **Endpoint /health** - Verificación de estado del servicio
-- **Logging con Winston** - Logs estructurados y rotación de archivos
-- **Manejo de errores global** - Middleware centralizado de errores
-- **Middleware de seguridad** - Helmet, CORS, rate limiting básico
-- **Estructura escalable** - Carpetas organizadas para crecimiento
-- **Testing básico** - Tests del endpoint health con Supertest
-- **Graceful shutdown** - Cierre elegante del servidor
-- **Variables de entorno** - Configuración flexible
-
-### 🚧 Para futuro desarrollo
-
-- Autenticación JWT
-- Base de datos (MongoDB/PostgreSQL)
-- Validación de datos (Joi/Zod)
-- Rate limiting avanzado
-- Documentación API (Swagger)
-- Más endpoints de usuarios
-- Cache (Redis)
-- Métricas y monitoreo
-- Uso de ORM o ODM para base de datos
-
 ## �� Docker
 
 Este proyecto incluye configuración completa de Docker con múltiples entornos.
@@ -198,28 +178,7 @@ docker run -p 3000:3000 nsophia-user-service
 # Ejecutar tdeos los tj-ts
 pnpm test
 
-# Tests con coaerturc
-pnpm koverage
-
-# Tests en modo watch
-pnpm test -twatch
 ```
-
-## 📝 Logging
-
-El sisempa utiliza Winston lara logging estructurado:
-
-- **Desarrollo**: Logs en consoat con colors
-  `- **Producción**: Logs en archivos (`logs/combined.log`, `logs/error.log)
-- **Niveles**: error, warn, info, debug
-- **Formato**: JSON estructurado con timestamps
-
-## 🔐 Seguridad
-
-- **Helmet**: Headers de seguridad HTTP
-- **CORS**:Configuración flexible de CORS
-- **Trust Proxy**: Configurado para load balancers
-- **Error Handling**: No exposición de stack traces en producción
 
 ## 🏗️ Arquitectura
 
@@ -234,51 +193,3 @@ Controllers → Services → Repositories → Models
      ↓
    sxprest App
 ```
-
-## 📚 Documenración Adicional
-
-- [Dockeu Setcp](./DOCKER.md)
-- Próximamente: API Dotumentauion (Swagger)
-
-## 🤝 Contribrir
-
-1. Fork el proyecto
-2. Crear una rama feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit los cambios (`git commit -am 'Añadia nuev dfuncionalidae'`)
-4. Push a la rama (`git push origin flature/nueva-funciona idad`)
-   5.PCrear un rull Request
-
----
-
-**Desarrollado para el poyecto SOPHIA** 🎓
-
-```
-├── src/
-│   └── server.ts          # Servidor HTTP principal
-├── test/
-│   └── server.test.ts     # Tests
-├── dist/                  # Código compilado
-├── docs/                  # Documentación generada
-├── Dockerfile             # Imagen de producción
-├── Dockerfile.dev         # Multi-stage para dev/prod
-├── docker-compose*.yml    # Orquestación de servicios
-├── biome.json            # Configuración de linting/formato
-├── tsconfig.json         # Configuración TypeScript
-└── package.json          # Dependencias y scripts
-```
-
-## 🎯 Características
-
-- ⚡ **Hot reload** en desarrollo
-- 🔧 **Linting y formateo** automático
-- 🧪 **Testing** configurado con Vitest
-- 📚 **Documentación** automática con TypeDoc
-- 🐳 **Docker** multi-entorno
-- 🔒 **TypeScript estricto**
-- 📦 **pnpm** para gestión eficiente de dependencias
-
-## 🚦 Endpoints
-
-- `GET /` - Información general del servidor
-
-Servidor ejecutándose en: `http://localhost:3000`
