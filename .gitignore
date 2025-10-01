@@ -272,5 +272,7 @@ dist
 # Ignore all local history of files
 .history
 .ionide
+# Documentation:
+docs/**
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,intellij,node

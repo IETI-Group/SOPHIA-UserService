@@ -1,11 +1,14 @@
 import type { Request, Response } from 'express';
+import { diContainer } from '../config/index.js';
+import type { ExampleService } from '../services/index.js';
 import { logger } from '../utils/logger.js';
 
 export const getHealth = (req: Request, res: Response): void => {
   try {
+    const exampleService: ExampleService = diContainer.resolve<ExampleService>('exampleService');
     const healthData = {
       success: true,
-      message: 'SOPHIA User Service is running successfully',
+      message: `SOPHIA User Service is running successfully: ${exampleService.getExampleMessage()}`,
       timestamp: new Date().toISOString(),
       service: 'sophia-user-service',
       version: '1.0.0',

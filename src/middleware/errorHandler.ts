@@ -52,13 +52,14 @@ export const errorHandler = (
 
   res.status(error.statusCode || 500).json({
     success: false,
-    error: error.message || 'Server Error',
+    error: error.statusCode === 404 ? `Not found - ${req.originalUrl}` : 'Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 
-export const notFound = (req: Request, _res: Response, next: NextFunction): void => {
-  const error = new Error(`Not found - ${req.originalUrl}`) as CustomError;
-  error.statusCode = 404;
-  next(error);
+export const notFound = (req: Request, res: Response, _next: NextFunction): void => {
+  res.status(404).json({
+    success: false,
+    error: `Not found - ${req.originalUrl}`,
+  });
 };

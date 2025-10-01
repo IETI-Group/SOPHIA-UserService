@@ -25,7 +25,8 @@ describe('SOPHIA User Service API', () => {
 
       expect(response.body).toMatchObject({
         success: true,
-        message: 'SOPHIA User Service is running successfully',
+        message:
+          'SOPHIA User Service is running successfully: This is an example message from ExampleServiceImpl',
         service: 'sophia-user-service',
         version: '1.0.0',
       });
