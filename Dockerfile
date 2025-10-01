@@ -1,4 +1,4 @@
-FROM node:24-alpine3.21
+FROM node:22-bookworm-slim
 
 RUN npm install -g pnpm
 
