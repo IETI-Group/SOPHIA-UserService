@@ -1,11 +1,11 @@
-import express, { type Application } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
-import { config } from "dotenv";
-import { logger } from "./utils/logger.js";
-import { errorHandler, notFound } from "./middleware/errorHandler.js";
-import routes from "./routes/index.js";
+import cors from 'cors';
+import { config } from 'dotenv';
+import express, { type Application } from 'express';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import { errorHandler, notFound } from './middleware/errorHandler.js';
+import routes from './routes/index.js';
+import { logger } from './utils/logger.js';
 
 // Cargar variables de entorno
 config();
@@ -27,15 +27,15 @@ class App {
     // CORS
     this.app.use(
       cors({
-        origin: process.env.CORS_ORIGIN || "*",
+        origin: process.env.CORS_ORIGIN || '*',
         credentials: true,
       })
     );
 
     // Logging HTTP requests
-    if (process.env.NODE_ENV !== "test") {
+    if (process.env.NODE_ENV !== 'test') {
       this.app.use(
-        morgan("combined", {
+        morgan('combined', {
           stream: {
             write: (message: string) => {
               logger.info(message.trim());
@@ -46,27 +46,27 @@ class App {
     }
 
     // Body parsing middleware
-    this.app.use(express.json({ limit: "100mb" }));
+    this.app.use(express.json({ limit: '100mb' }));
     this.app.use(express.urlencoded({ extended: true }));
 
     // Configurar trust proxy si está detrás de un proxy/load balancer
-    this.app.set("trust proxy", 1);
+    this.app.set('trust proxy', 1);
   }
 
   private routes(): void {
     // API routes
-    this.app.use("/api/v1", routes);
+    this.app.use('/api/v1', routes);
 
     // Root endpoint
-    this.app.get("/", (req, res) => {
+    this.app.get('/', (_req, res) => {
       res.json({
         success: true,
-        message: "Welcome to SOPHIA User Service API",
-        version: "1.0.0",
+        message: 'Welcome to SOPHIA User Service API',
+        version: '1.0.0',
         endpoints: {
-          health: "/api/v1/health",
+          health: '/api/v1/health',
         },
-        documentation: "/api/docs", // Para futuro
+        documentation: '/api/docs', // Para futuro
         timestamp: new Date().toISOString(),
       });
     });

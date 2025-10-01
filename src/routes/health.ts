@@ -1,5 +1,5 @@
-import { Router, type IRouter } from "express";
-import { getHealth } from "../controllers/healthController.js";
+import { type IRouter, Router } from 'express';
+import { getHealth } from '../controllers/healthController.js';
 
 const router: IRouter = Router();
 
@@ -8,6 +8,6 @@ const router: IRouter = Router();
  * @desc    Check if the service is running
  * @access  Public
  */
-router.get("/", getHealth);
+router.get('/', getHealth);
 
 export default router;

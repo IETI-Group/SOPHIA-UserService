@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/logger.js";
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../utils/logger.js';
 
 export interface CustomError extends Error {
   statusCode?: number;
@@ -10,7 +10,7 @@ export const errorHandler = (
   err: CustomError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   let error = { ...err };
   error.message = err.message;
@@ -25,43 +25,39 @@ export const errorHandler = (
   });
 
   // Error de validación
-  if (err.name === "ValidationError") {
-    const message = "Validation Error";
+  if (err.name === 'ValidationError') {
+    const message = 'Validation Error';
     error = {
-      name: "ValidationError",
+      name: 'ValidationError',
       message,
       statusCode: 400,
     } as CustomError;
   }
 
   // Error de duplicado
-  if (err.name === "MongoError" && (err as any).code === 11000) {
-    const message = "Duplicate field value entered";
+  if (err.name === 'MongoError' && (err as Error)) {
+    const message = 'Duplicate field value entered';
     error = {
-      name: "DuplicateFieldError",
+      name: 'DuplicateFieldError',
       message,
       statusCode: 400,
     } as CustomError;
   }
 
   // Error de cast (ID inválido)
-  if (err.name === "CastError") {
-    const message = "Resource not found";
-    error = { name: "CastError", message, statusCode: 404 } as CustomError;
+  if (err.name === 'CastError') {
+    const message = 'Resource not found';
+    error = { name: 'CastError', message, statusCode: 404 } as CustomError;
   }
 
   res.status(error.statusCode || 500).json({
     success: false,
-    error: error.message || "Server Error",
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    error: error.message || 'Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 
-export const notFound = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+export const notFound = (req: Request, _res: Response, next: NextFunction): void => {
   const error = new Error(`Not found - ${req.originalUrl}`) as CustomError;
   error.statusCode = 404;
   next(error);

@@ -18,26 +18,26 @@ export const HTTP_STATUS = {
 
 // Mensajes de error comunes
 export const ERROR_MESSAGES = {
-  SERVER_ERROR: "Internal server error",
-  NOT_FOUND: "Resource not found",
-  UNAUTHORIZED: "Unauthorized access",
-  FORBIDDEN: "Access forbidden",
-  BAD_REQUEST: "Bad request",
-  VALIDATION_ERROR: "Validation error",
+  SERVER_ERROR: 'Internal server error',
+  NOT_FOUND: 'Resource not found',
+  UNAUTHORIZED: 'Unauthorized access',
+  FORBIDDEN: 'Access forbidden',
+  BAD_REQUEST: 'Bad request',
+  VALIDATION_ERROR: 'Validation error',
 } as const;
 
 // Mensajes de éxito
 export const SUCCESS_MESSAGES = {
-  OPERATION_SUCCESS: "Operation completed successfully",
-  CREATED: "Resource created successfully",
-  UPDATED: "Resource updated successfully",
-  DELETED: "Resource deleted successfully",
+  OPERATION_SUCCESS: 'Operation completed successfully',
+  CREATED: 'Resource created successfully',
+  UPDATED: 'Resource updated successfully',
+  DELETED: 'Resource deleted successfully',
 } as const;
 
 // Configuraciones de la aplicación
 export const APP_CONFIG = {
-  API_VERSION: "v1",
+  API_VERSION: 'v1',
   DEFAULT_PAGE_SIZE: 10,
   MAX_PAGE_SIZE: 100,
-  DEFAULT_SORT_ORDER: "desc",
+  DEFAULT_SORT_ORDER: 'desc',
 } as const;
