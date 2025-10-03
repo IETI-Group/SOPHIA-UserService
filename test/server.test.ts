@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import app from '../src/app.js';
 
 describe('SOPHIA User Service API', () => {
+  const prefix = app.get('apiPrefix');
   describe('GET /', () => {
     it('should return welcome message', async () => {
       const response = await request(app).get('/').expect(200);
@@ -10,23 +11,22 @@ describe('SOPHIA User Service API', () => {
       expect(response.body).toMatchObject({
         success: true,
         message: 'Welcome to SOPHIA User Service API',
-        version: '1.0.0',
+        version: 'v1',
         endpoints: {
-          health: '/api/v1/health',
+          health: `${prefix}/health`,
         },
       });
       expect(response.body.timestamp).toBeDefined();
     });
   });
 
-  describe('GET /api/v1/health', () => {
+  describe('GET /health', () => {
     it('should return health status', async () => {
-      const response = await request(app).get('/api/v1/health').expect(200);
+      const response = await request(app).get(`${prefix}/health`).expect(200);
 
       expect(response.body).toMatchObject({
         success: true,
-        message:
-          'SOPHIA User Service is running successfully: This is an example message from ExampleServiceImpl',
+        message: 'SOPHIA User Service is running successfully',
         service: 'sophia-user-service',
         version: '1.0.0',
       });

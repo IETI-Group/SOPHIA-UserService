@@ -1,5 +1,5 @@
-import ExampleServiceImpl from './implementations/ExampleServiceImpl.js';
+import UserServiceImpl from './implementations/UserServiceImpl.js';
 
-export type { default as ExampleService } from './interfaces/ExampleService.js';
+export type { default as UserService } from './interfaces/UserService.js';
 
-export { ExampleServiceImpl };
+export { UserServiceImpl };

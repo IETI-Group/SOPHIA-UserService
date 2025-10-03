@@ -1,40 +1,3 @@
-// Respuesta estándar de la API
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-  timestamp: string;
-}
-
-// Respuesta de error de la API
-export interface ApiErrorResponse {
-  success: false;
-  error: string;
-  timestamp: string;
-  stack?: string;
-}
-
-// Respuesta paginada
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
-}
-
-// Query parameters para paginación
-export interface PaginationQuery {
-  page?: number;
-  limit?: number;
-  sort?: string;
-  order?: 'asc' | 'desc';
-}
-
-// Información de salud del servicio
 export interface HealthInfo {
   success: boolean;
   message: string;
@@ -47,4 +10,35 @@ export interface HealthInfo {
     used: number;
     total: number;
   };
+}
+
+export enum ROLE {
+  ADMIN = 'admin',
+  INSTRUCTOR = 'instructor',
+  STUDENT = 'student',
+  GUEST = 'guest',
+}
+
+export enum LEARNING_STYLES {
+  VISUAL = 'visual',
+  AUDITORY = 'auditory',
+  KINESTHETIC = 'kinesthetic',
+  READING_WRITING = 'reading_writing',
+  GAMIFICATION = 'gamification',
+  STORYTELLING = 'storytelling',
+  CASE_STUDY = 'case_study',
+  PROBLEM_SOLVING = 'problem_solving',
+  COLLABORATIVE = 'collaborative',
+  SELF_PACED = 'self_paced',
+}
+
+export enum PACE_PREFERENCE {
+  SLOW = 'slow',
+  NORMAL = 'normal',
+  FAST = 'fast',
+}
+
+export enum REVIEW_DISCRIMINANT {
+  INSTRUCTOR = 'instructor',
+  COURSE = 'course',
 }

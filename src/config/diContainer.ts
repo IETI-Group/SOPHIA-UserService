@@ -1,21 +1,22 @@
-import { asClass, createContainer, InjectionMode, Lifetime } from 'awilix';
-import { ExampleServiceImpl } from '../services/index.js';
+import { asClass, asValue, createContainer, InjectionMode, Lifetime } from 'awilix';
+import UserController from '../controllers/UserController.js';
+import { UserServiceImpl } from '../services/index.js';
+import { logger } from '../utils/logger.js';
 
 const container = createContainer({
   injectionMode: InjectionMode.CLASSIC,
 });
 
 container.register({
-  // Services Example
-  //prisma: asValue(prisma),
-  //guestRepository: asClass(GuestRepositoryPostgres, {
-  //	lifetime: Lifetime.SINGLETON
-  //})
-  exampleService: asClass(ExampleServiceImpl, {
+  logger: asValue(logger),
+
+  userService: asClass(UserServiceImpl, {
+    lifetime: Lifetime.SINGLETON,
+  }),
+
+  userController: asClass(UserController, {
     lifetime: Lifetime.SINGLETON,
   }),
 });
 
-// This is how to use the container
-// const guestRepository = container.resolve<GuestRepository>('guestRepository');
 export default container;

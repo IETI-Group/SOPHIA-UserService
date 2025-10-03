@@ -1,14 +1,11 @@
 import cors from 'cors';
-import { config } from 'dotenv';
 import express, { type Application } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { envConfig } from './config/env.config.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import routes from './routes/index.js';
 import { logger } from './utils/logger.js';
-
-// Cargar variables de entorno
-config();
 
 class App {
   public app: Application;
@@ -27,13 +24,13 @@ class App {
     // CORS
     this.app.use(
       cors({
-        origin: process.env.CORS_ORIGIN || '*',
-        credentials: true,
+        origin: envConfig.cors.origin,
+        credentials: envConfig.cors.credentials,
       })
     );
 
     // Logging HTTP requests
-    if (process.env.NODE_ENV !== 'test') {
+    if (!envConfig.server.isTest) {
       this.app.use(
         morgan('combined', {
           stream: {
@@ -55,18 +52,20 @@ class App {
 
   private routes(): void {
     // API routes
-    this.app.use('/api/v1', routes);
+    const prefix = `${envConfig.api.prefix}/${envConfig.api.version}`;
+    this.app.use(prefix, routes);
+    this.app.set('apiPrefix', prefix);
 
     // Root endpoint
     this.app.get('/', (_req, res) => {
       res.json({
         success: true,
         message: 'Welcome to SOPHIA User Service API',
-        version: '1.0.0',
+        version: envConfig.api.version,
         endpoints: {
-          health: '/api/v1/health',
+          health: `${prefix}/health`,
         },
-        documentation: '/api/docs', // Para futuro
+        documentation: `${prefix}/docs`, // Para futuro
         timestamp: new Date().toISOString(),
       });
     });

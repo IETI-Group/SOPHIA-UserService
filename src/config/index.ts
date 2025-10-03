@@ -1,3 +1,6 @@
 import diContainer from './diContainer.js';
+import envConfig, { validateEnvConfig } from './env.config.js';
 
-export { diContainer };
+export { diContainer, envConfig, validateEnvConfig };
+
+export default { diContainer, envConfig, validateEnvConfig };
