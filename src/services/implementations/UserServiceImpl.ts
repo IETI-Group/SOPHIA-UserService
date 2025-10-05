@@ -9,6 +9,7 @@ import type {
   PaginatedUsers,
   ReviewInDTO,
   ReviewOutDTO,
+  UserInDTO,
   UserOutDTO,
   UserUpdateDTO,
 } from '../../models/index.js';
@@ -23,6 +24,7 @@ export default class UserServiceImpl implements UserService {
     _size: number,
     _sort: string,
     _order: 'asc' | 'desc',
+    _lightDTO: boolean | undefined,
     _filters: FiltersUser
   ): Promise<PaginatedUsers> {
     throw new Error('Method not implemented.');
@@ -30,7 +32,17 @@ export default class UserServiceImpl implements UserService {
   async getUserById(_userId: string, _lightDTO: boolean): Promise<UserOutDTO> {
     throw new Error('Method not implemented.');
   }
-  async postUser(_userDTO: UserUpdateDTO): Promise<UserOutDTO> {
+  async getUsersByIds(
+    _userIds: string[],
+    _page: number,
+    _size: number,
+    _sort: string | undefined,
+    _order: 'asc' | 'desc',
+    _lightDTO?: boolean
+  ): Promise<PaginatedUsers> {
+    throw new Error('Method not implemented.');
+  }
+  async postUser(_userDTO: UserInDTO): Promise<UserOutDTO> {
     throw new Error('Method not implemented.');
   }
   async updateUser(_userId: string, _userInDTO: Partial<UserUpdateDTO>): Promise<UserOutDTO> {
@@ -58,6 +70,8 @@ export default class UserServiceImpl implements UserService {
     _reviewerId: string,
     _page: number,
     _size: number,
+    _sort: string | undefined,
+    _order: 'asc' | 'desc',
     _showInstructors?: boolean,
     _showCourses?: boolean
   ): Promise<PaginatedReviews> {
@@ -78,7 +92,9 @@ export default class UserServiceImpl implements UserService {
   async getLinkedAccounts(
     _userId: string,
     _page: number,
-    _size: number
+    _size: number,
+    _sort: string | undefined,
+    _order: 'asc' | 'desc'
   ): Promise<PaginatedLinkedAccounts> {
     throw new Error('Method not implemented.');
   }

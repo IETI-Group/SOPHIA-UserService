@@ -13,6 +13,7 @@ import type ApiResponse from './response/ApiResponse.js';
 import ReviewInDTO from './review/ReviewInDTO.js';
 import ReviewOutDTO from './review/ReviewOutDTO.js';
 import UserHeavyOutDTO from './user/UserHeavyOutDTO.js';
+import UserInDTO from './user/UserInDTO.js';
 import UserOutDTO from './user/UserOutDTO.js';
 import UserUpdateDTO from './user/UserUpdateDTO.js';
 
@@ -20,6 +21,7 @@ export {
   UserOutDTO,
   UserUpdateDTO,
   UserHeavyOutDTO,
+  UserInDTO,
   type ApiRequestQuery,
   type UsersQuery,
   PaginatedUsers,

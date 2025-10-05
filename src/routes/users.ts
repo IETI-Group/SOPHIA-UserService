@@ -6,10 +6,12 @@ import type { UsersQuery } from '../models/index.js';
 import {
   batchUsers,
   booleanQuery,
+  emailParam,
   paginationParams,
+  parsePaginationQuery,
+  parseUsersQuery,
   stringParam,
   usersParams,
-  validateUsersQuery,
 } from '../utils/validators.js';
 
 const router: IRouter = Router();
@@ -31,13 +33,23 @@ router.get('/', [...usersParams, ...paginationParams], async (req: Request, res:
         .map((err) => err.msg)
         .join(', ')}`
     );
-  const { page, size, sort, order, firstName, lastName, birthDayFrom, birthDayTo }: UsersQuery =
-    validateUsersQuery(req);
+  const {
+    page,
+    size,
+    sort,
+    order,
+    lightDTO,
+    firstName,
+    lastName,
+    birthDayFrom,
+    birthDayTo,
+  }: UsersQuery = parseUsersQuery(req);
   const users = await userController.getUsers(
     page,
     size,
     sort,
     order,
+    lightDTO,
     firstName,
     lastName,
     birthDayFrom,
@@ -50,13 +62,13 @@ router.get(
   '/id/:id',
   [
     stringParam('id', 'Invalid user ID'),
-    booleanQuery('heavy_dto', 'Invalid heavy DTO value', true),
+    booleanQuery('light_dto', 'Invalid light DTO value', true),
   ],
   async (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
       throw new Error('Validation error: Invalid user ID');
     }
-    const user = await userController.getUserById(req.params.id, req.query.heavy_dto === 'true');
+    const user = await userController.getUserById(req.params.id, req.query.light_dto === 'true');
     res.json(user);
   }
 );
@@ -64,8 +76,8 @@ router.get(
 router.get(
   '/email/:email',
   [
-    stringParam('email', 'Invalid email'),
-    booleanQuery('heavy_dto', 'Invalid heavy DTO value', true),
+    emailParam('email', 'Invalid email format'),
+    booleanQuery('light_dto', 'Invalid light DTO value', true),
   ],
   async (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
@@ -73,23 +85,21 @@ router.get(
     }
     const user = await userController.getUserByEmail(
       req.params.email,
-      req.query.heavy_dto === 'true'
+      req.query.light_dto === 'true'
     );
     res.json(user);
   }
 );
 
-// router.post('/', async (req: Request, res: Response) => {
-
-// });
-
-router.get('/batch', [batchUsers, ...paginationParams], async (req: Request, _res: Response) => {
+router.post('/batch', [...batchUsers, ...paginationParams], async (req: Request, res: Response) => {
   if (!validationResult(req).isEmpty()) {
     throw new Error('Validation error: Invalid users array');
   }
 
-  // TODO:
-  // Implementar lógica para obtener usuarios en batch
+  const { users } = req.body as { users: string[] };
+  const { page, size, sort, order } = parsePaginationQuery(req);
+  const userList = await userController.getUsersByIds(users, page, size, sort, order, false);
+  res.json(userList);
 });
 
 export default router;

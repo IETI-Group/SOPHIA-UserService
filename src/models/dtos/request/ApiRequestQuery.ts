@@ -1,6 +1,7 @@
 export default interface ApiRequestQuery {
   page: number;
   size: number;
-  sort: string;
+  sort?: string;
   order: 'asc' | 'desc';
+  lightDTO?: boolean;
 }

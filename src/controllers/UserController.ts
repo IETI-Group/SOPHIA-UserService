@@ -13,6 +13,7 @@ import {
   type PaginatedUsers,
   type ReviewInDTO,
   type ReviewOutDTO,
+  type UserInDTO,
   type UserOutDTO,
   type UserUpdateDTO,
 } from '../models/index.js';
@@ -33,6 +34,7 @@ export default class UserController {
     size: number,
     sort: string | undefined,
     order: 'asc' | 'desc',
+    lightDto?: boolean,
     firstName?: string,
     lastName?: string,
     birthDayFrom?: Date,
@@ -41,7 +43,15 @@ export default class UserController {
     const filters = new FiltersUser(firstName, lastName, birthDayFrom, birthDayTo);
     const searchSort = sort || 'firstName';
 
-    return this.userService.getUsers(page, size, searchSort, order, filters);
+    const response = await this.userService.getUsers(
+      page,
+      size,
+      searchSort,
+      order,
+      lightDto,
+      filters
+    );
+    return response;
   }
   public async getUserById(userId: string, lightDTO?: boolean): Promise<ApiResponse<UserOutDTO>> {
     const response = await this.userService.getUserById(userId, lightDTO);
@@ -53,7 +63,7 @@ export default class UserController {
     return parseApiResponse(response);
   }
 
-  public async postUser(userDTO: UserUpdateDTO): Promise<ApiResponse<UserOutDTO>> {
+  public async postUser(userDTO: UserInDTO): Promise<ApiResponse<UserOutDTO>> {
     const response = await this.userService.postUser(userDTO);
     return parseApiResponse(response);
   }
@@ -90,16 +100,21 @@ export default class UserController {
     reviewerId: string,
     page: number,
     size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc',
     showInstructors?: boolean,
     showCourses?: boolean
   ): Promise<PaginatedReviews> {
-    return await this.userService.getUserReviews(
+    const response = await this.userService.getUserReviews(
       reviewerId,
       page,
       size,
+      sort,
+      order,
       showInstructors,
       showCourses
     );
+    return response;
   }
   public async postReview(reviewIn: ReviewInDTO): Promise<ApiResponse<ReviewOutDTO>> {
     const response = await this.userService.postReview(reviewIn);
@@ -119,9 +134,12 @@ export default class UserController {
   public async getLinkedAccounts(
     userId: string,
     page: number,
-    size: number
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
   ): Promise<PaginatedLinkedAccounts> {
-    return await this.userService.getLinkedAccounts(userId, page, size);
+    const response = await this.userService.getLinkedAccounts(userId, page, size, sort, order);
+    return response;
   }
   public async getLinkedAccount(accountId: string): Promise<ApiResponse<LinkedAccountOutDTO>> {
     const response = await this.userService.getLinkedAccount(accountId);
@@ -143,5 +161,16 @@ export default class UserController {
   public async deleteLinkedAccount(accountId: string): Promise<ApiResponse<string>> {
     await this.userService.deleteLinkedAccount(accountId);
     return parseApiResponse(`Linked account with id ${accountId} deleted successfully`);
+  }
+
+  public async getUsersByIds(
+    userIds: string[],
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc',
+    lightDTO?: boolean
+  ): Promise<PaginatedUsers> {
+    return this.userService.getUsersByIds(userIds, page, size, sort, order, lightDTO);
   }
 }
