@@ -1,6 +1,11 @@
 import type { Request } from 'express';
 import { body, param, query, type ValidationChain } from 'express-validator';
-import type { ApiRequestQuery, UsersQuery } from '../models/index.js';
+import {
+  type ApiRequestQuery,
+  UserInDTO,
+  type UsersQuery,
+  type UserUpdateDTO,
+} from '../models/index.js';
 import { APP_CONFIG } from './constants.js';
 
 export const parseUsersQuery = (req: Request): UsersQuery => {
@@ -41,6 +46,25 @@ export const parsePaginationQuery = (req: Request): ApiRequestQuery => {
   const sort = req.query.sort ? (req.query.sort as string) : undefined;
   const order = (req.query.order as 'asc' | 'desc') || APP_CONFIG.DEFAULT_SORT_ORDER;
   return { page, size, sort, order };
+};
+
+export const parseUserInBody = (req: Request): UserInDTO => {
+  return new UserInDTO(
+    req.body.firstName,
+    req.body.lastName,
+    req.body.email,
+    new Date(req.body.birthDate)
+  );
+};
+
+export const parseUserUpdateInBody = (req: Request): Partial<UserUpdateDTO> => {
+  const userUpdate: Partial<UserUpdateDTO> = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    birthDate: req.body.birthDate ? new Date(req.body.birthDate) : undefined,
+  } as Partial<UserUpdateDTO>;
+  return userUpdate;
 };
 
 export const usersParams: ValidationChain[] = [
@@ -94,6 +118,29 @@ export const booleanQuery = (
   optional: boolean = false
 ): ValidationChain => {
   return query(queryName).isBoolean().withMessage(message).optional(optional);
+};
+
+export const userInDTO = (partial = false): ValidationChain[] => {
+  return [
+    body('firstName')
+      .isString()
+      .notEmpty()
+      .withMessage('First name is required and must be a string')
+      .isLength({ max: 60 })
+      .withMessage('First name must be at most 60 characters long'),
+    body('lastName')
+      .isString()
+      .notEmpty()
+      .withMessage('Last name is required and must be a string')
+      .isLength({ max: 100 })
+      .withMessage('Last name must be at most 100 characters long'),
+    body('email').isEmail().isLength({ max: 254 }).withMessage('A valid email is required'),
+    body('birthDate')
+      .isISO8601()
+      .toDate()
+      .isBefore(new Date().toISOString().split('T')[0])
+      .withMessage('Birth date must be a valid date in format YYYY-MM-DD'),
+  ].map((validation) => (partial ? validation.optional() : validation));
 };
 
 export const batchUsers: ValidationChain[] = [

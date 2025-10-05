@@ -12,7 +12,6 @@ import {
   ReviewInDTO,
   ReviewOutDTO,
   UserInDTO,
-  UserOutDTO,
 } from '../../src/models/index.js';
 import type { UserService } from '../../src/services/index.js';
 import {
@@ -39,18 +38,18 @@ describe('User Controller tests', () => {
         success: true,
         message: 'Users retrieved successfully',
         data: [
-          new UserOutDTO('1', ROLE.ADMIN),
-          new UserOutDTO('2', ROLE.INSTRUCTOR),
-          new UserOutDTO('3', ROLE.STUDENT),
-          new UserOutDTO('4', ROLE.STUDENT),
-          new UserOutDTO('5', ROLE.INSTRUCTOR),
-          new UserOutDTO('6', ROLE.STUDENT),
-          new UserOutDTO('7', ROLE.INSTRUCTOR),
-          new UserOutDTO('8', ROLE.STUDENT),
-          new UserOutDTO('9', ROLE.STUDENT),
-          new UserOutDTO('10', ROLE.INSTRUCTOR),
-          new UserOutDTO('11', ROLE.STUDENT),
-          new UserOutDTO('12', ROLE.STUDENT),
+          { userId: '1', role: ROLE.ADMIN },
+          { userId: '2', role: ROLE.INSTRUCTOR },
+          { userId: '3', role: ROLE.STUDENT },
+          { userId: '4', role: ROLE.STUDENT },
+          { userId: '5', role: ROLE.INSTRUCTOR },
+          { userId: '6', role: ROLE.STUDENT },
+          { userId: '7', role: ROLE.INSTRUCTOR },
+          { userId: '8', role: ROLE.STUDENT },
+          { userId: '9', role: ROLE.STUDENT },
+          { userId: '10', role: ROLE.INSTRUCTOR },
+          { userId: '11', role: ROLE.STUDENT },
+          { userId: '12', role: ROLE.STUDENT },
         ],
         timestamp,
         pagination: {
@@ -114,10 +113,10 @@ describe('User Controller tests', () => {
         params.birthDayTo
       );
       const timestamp = new Date().toISOString();
-      const mockUsers = Array.from(
-        { length: 5 },
-        (_, i) => new UserOutDTO((i + 1).toString(), ROLE.STUDENT)
-      );
+      const mockUsers = Array.from({ length: 5 }, (_, i) => ({
+        userId: (i + 1).toString(),
+        role: ROLE.STUDENT,
+      }));
 
       userService.getUsers.mockResolvedValue({
         success: true,
@@ -176,7 +175,7 @@ describe('User Controller tests', () => {
     it('should return a user by ID', async () => {
       const userId = '12345';
       const lightDTO = true;
-      const mockUser = new UserOutDTO(userId, ROLE.INSTRUCTOR);
+      const mockUser = { userId, role: ROLE.INSTRUCTOR };
       userService.getUserById.mockResolvedValue(mockUser);
 
       const result = await userController.getUserById(userId, lightDTO);
@@ -184,24 +183,16 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(UserOutDTO);
-      expect(result.data?.getUserId()).toBe(userId);
-      expect(result.data?.getRole()).toBe(ROLE.INSTRUCTOR);
+      expect(result.data).toEqual(mockUser);
       expect(result.timestamp).toBeDefined();
     });
   });
 
   describe('create user', () => {
     it('should call the service to create a user and return the created user', async () => {
-      const userDTO = new UserInDTO(
-        'Jane',
-        'Doe',
-        'jane.doe@example.com',
-        new Date('1995-05-15'),
-        ROLE.STUDENT
-      );
+      const userDTO = new UserInDTO('Jane', 'Doe', 'jane.doe@example.com', new Date('1995-05-15'));
 
-      const createdUser = new UserOutDTO('1', ROLE.STUDENT);
+      const createdUser = { userId: '1', role: ROLE.STUDENT };
       userService.postUser.mockResolvedValue(createdUser);
 
       const result = await userController.postUser(userDTO);
@@ -209,9 +200,7 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(UserOutDTO);
-      expect(result.data?.getUserId()).toBe('1');
-      expect(result.data?.getRole()).toBe(ROLE.STUDENT);
+      expect(result.data).toEqual(createdUser);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.postUser).toHaveBeenCalledTimes(1);
@@ -228,16 +217,14 @@ describe('User Controller tests', () => {
         lastName: 'UpdatedLastName',
       } as Partial<UserUpdateDTO>;
 
-      const updatedUser = new UserOutDTO(userId, ROLE.INSTRUCTOR);
+      const updatedUser = { userId, role: ROLE.INSTRUCTOR };
       userService.updateUser.mockResolvedValue(updatedUser);
 
       const result = await userController.updateUser(userId, userUpdateDTO);
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(UserOutDTO);
-      expect(result.data?.getUserId()).toBe(userId);
-      expect(result.data?.getRole()).toBe(ROLE.INSTRUCTOR);
+      expect(result.data).toEqual(updatedUser);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.updateUser).toHaveBeenCalledTimes(1);
@@ -267,7 +254,7 @@ describe('User Controller tests', () => {
     it('should return a user by email', async () => {
       const email = 'test@example.com';
       const lightDTO = true;
-      const mockUser = new UserOutDTO('12345', ROLE.INSTRUCTOR);
+      const mockUser = { userId: '12345', role: ROLE.INSTRUCTOR };
       userService.getUserByEmail.mockResolvedValue(mockUser);
 
       const result = await userController.getUserByEmail(email, lightDTO);
@@ -275,9 +262,7 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(UserOutDTO);
-      expect(result.data?.getUserId()).toBe('12345');
-      expect(result.data?.getRole()).toBe(ROLE.INSTRUCTOR);
+      expect(result.data).toEqual(mockUser);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.getUserByEmail).toHaveBeenCalledTimes(1);
@@ -728,7 +713,7 @@ describe('User Controller tests', () => {
         lightDTO: true,
       };
       const timestamp = new Date().toISOString();
-      const mockUsers = userIds.map((id) => new UserOutDTO(id, ROLE.STUDENT));
+      const mockUsers = userIds.map((id) => ({ userId: id, role: ROLE.STUDENT }));
 
       userService.getUsersByIds.mockResolvedValue({
         success: true,
