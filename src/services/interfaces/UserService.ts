@@ -52,11 +52,16 @@ export default interface UserService {
     sort: string | undefined,
     order: 'asc' | 'desc',
     showInstructors?: boolean,
-    showCourses?: boolean
+    showCourses?: boolean,
+    reviewedUserId?: string
   ): Promise<PaginatedReviews>;
   postReview(reviewIn: ReviewInDTO): Promise<ReviewOutDTO>;
-  updateReview(reviewId: string, reviewInstructor: Partial<ReviewInDTO>): Promise<ReviewOutDTO>;
-  deleteReview(reviewId: string): Promise<void>;
+  updateReview(
+    userId: string,
+    reviewId: string,
+    reviewedDTO: Partial<ReviewInDTO>
+  ): Promise<ReviewOutDTO>;
+  deleteReview(userId: string, reviewId: string): Promise<void>;
   getLinkedAccounts(
     userId: string,
     page: number,
@@ -64,11 +69,15 @@ export default interface UserService {
     sort: string | undefined,
     order: 'asc' | 'desc'
   ): Promise<PaginatedLinkedAccounts>;
-  getLinkedAccount(accountId: string): Promise<LinkedAccountOutDTO>;
-  postLinkedAccount(linkedAccountIn: LinkedAccountInDTO): Promise<LinkedAccountOutDTO>;
+  getLinkedAccount(userId: string, accountId: string): Promise<LinkedAccountOutDTO>;
+  postLinkedAccount(
+    userId: string,
+    linkedAccountIn: LinkedAccountInDTO
+  ): Promise<LinkedAccountOutDTO>;
   updateLinkedAccount(
+    userId: string,
     accountId: string,
     linkedAccountUpdate: Partial<LinkedAccountInDTO>
   ): Promise<LinkedAccountOutDTO>;
-  deleteLinkedAccount(accountId: string): Promise<void>;
+  deleteLinkedAccount(userId: string, accountId: string): Promise<void>;
 }

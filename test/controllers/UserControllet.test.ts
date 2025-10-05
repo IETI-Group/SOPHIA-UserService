@@ -5,13 +5,13 @@ import UserController from '../../src/controllers/UserController.js';
 import type { UserUpdateDTO } from '../../src/models/index.js';
 import {
   FiltersUser,
-  LearningPathInDTO,
-  LearningPathOutDTO,
-  LinkedAccountInDTO,
-  LinkedAccountOutDTO,
-  ReviewInDTO,
-  ReviewOutDTO,
-  UserInDTO,
+  type LearningPathInDTO,
+  type LearningPathOutDTO,
+  type LinkedAccountInDTO,
+  type LinkedAccountOutDTO,
+  type ReviewInDTO,
+  type ReviewOutDTO,
+  type UserInDTO,
 } from '../../src/models/index.js';
 import type { UserService } from '../../src/services/index.js';
 import {
@@ -190,7 +190,12 @@ describe('User Controller tests', () => {
 
   describe('create user', () => {
     it('should call the service to create a user and return the created user', async () => {
-      const userDTO = new UserInDTO('Jane', 'Doe', 'jane.doe@example.com', new Date('1995-05-15'));
+      const userDTO: UserInDTO = {
+        email: 'jane.doe@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        birthDate: new Date('1995-05-15'),
+      };
 
       const createdUser = { userId: '1', role: ROLE.STUDENT };
       userService.postUser.mockResolvedValue(createdUser);
@@ -273,16 +278,17 @@ describe('User Controller tests', () => {
   describe('get user learning path', () => {
     it('should call the service to get user learning path and return it', async () => {
       const userId = '12345';
-      const mockLearningPath = new LearningPathOutDTO(
+      const mockLearningPath: LearningPathOutDTO = {
         userId,
-        LEARNING_STYLES.VISUAL,
-        LEARNING_STYLES.AUDITORY,
-        PACE_PREFERENCE.FAST,
-        5,
-        true,
-        new Date(),
-        new Date()
-      );
+        id: '67890',
+        primaryStyle: LEARNING_STYLES.VISUAL,
+        secondaryStyle: LEARNING_STYLES.AUDITORY,
+        pacePreference: PACE_PREFERENCE.FAST,
+        gamificationEnabled: true,
+        interactivityPreference: 4,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       userService.getUserLearningPath.mockResolvedValue(mockLearningPath);
 
       const result = await userController.getUserLearningPath(userId);
@@ -290,7 +296,6 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(LearningPathOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.getUserLearningPath).toHaveBeenCalledTimes(1);
@@ -301,23 +306,25 @@ describe('User Controller tests', () => {
   describe('post user learning path', () => {
     it('should call the service to create a learning path and return it', async () => {
       const userId = '12345';
-      const learningPathInDTO = new LearningPathInDTO(
-        LEARNING_STYLES.VISUAL,
-        LEARNING_STYLES.AUDITORY,
-        PACE_PREFERENCE.NORMAL,
-        5,
-        true
-      );
-      const mockLearningPath = new LearningPathOutDTO(
+      const learningPathInDTO = {
+        primaryStyle: LEARNING_STYLES.VISUAL,
+        secondaryStyle: LEARNING_STYLES.AUDITORY,
+        pacePreference: PACE_PREFERENCE.NORMAL,
+        duration: 5,
+        gamificationEnabled: true,
+        interactivityPreference: 4,
+      };
+      const mockLearningPath: LearningPathOutDTO = {
         userId,
-        LEARNING_STYLES.VISUAL,
-        LEARNING_STYLES.AUDITORY,
-        PACE_PREFERENCE.NORMAL,
-        5,
-        true,
-        new Date(),
-        new Date()
-      );
+        primaryStyle: LEARNING_STYLES.VISUAL,
+        secondaryStyle: LEARNING_STYLES.AUDITORY,
+        pacePreference: PACE_PREFERENCE.NORMAL,
+        id: '67890',
+        gamificationEnabled: true,
+        interactivityPreference: 4,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       userService.postUserLearningPath.mockResolvedValue(mockLearningPath);
 
       const result = await userController.postUserLearningPath(userId, learningPathInDTO);
@@ -325,7 +332,6 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(LearningPathOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.postUserLearningPath).toHaveBeenCalledTimes(1);
@@ -340,16 +346,17 @@ describe('User Controller tests', () => {
         primaryStyle: LEARNING_STYLES.KINESTHETIC,
         pacePreference: PACE_PREFERENCE.SLOW,
       } as Partial<LearningPathInDTO>;
-      const mockLearningPath = new LearningPathOutDTO(
+      const mockLearningPath = {
         userId,
-        LEARNING_STYLES.KINESTHETIC,
-        LEARNING_STYLES.READING_WRITING,
-        PACE_PREFERENCE.SLOW,
-        3,
-        false,
-        new Date(),
-        new Date()
-      );
+        id: '67890',
+        primaryStyle: LEARNING_STYLES.KINESTHETIC,
+        secondaryStyle: LEARNING_STYLES.READING_WRITING,
+        pacePreference: PACE_PREFERENCE.SLOW,
+        interactivityPreference: 3,
+        gamificationEnabled: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       userService.updateLearningPath.mockResolvedValue(mockLearningPath);
 
       const result = await userController.updateLearningPath(userId, learningPathUpdateDTO);
@@ -357,7 +364,6 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(LearningPathOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.updateLearningPath).toHaveBeenCalledTimes(1);
@@ -377,19 +383,19 @@ describe('User Controller tests', () => {
         showCourses: false,
       };
       const timestamp = new Date().toISOString();
-      const mockReviews = Array.from(
-        { length: 3 },
-        (_, i) =>
-          new ReviewOutDTO(
-            (i + 1).toString(),
-            new Date(),
-            new Date(),
-            5,
-            true,
-            'Great instructor',
-            REVIEW_DISCRIMINANT.INSTRUCTOR
-          )
-      );
+      const mockReviews: ReviewOutDTO[] = Array.from({ length: 3 }, (_, i) => {
+        return {
+          reviewedId: `review${i + 1}`,
+          id: `id${i + 1}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          rate: 5,
+          recommended: true,
+          comments: 'Great instructor',
+          discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+          reviewerId: reviewerId,
+        };
+      });
 
       userService.getUserReviews.mockResolvedValue({
         success: true,
@@ -431,28 +437,34 @@ describe('User Controller tests', () => {
         params.sort,
         params.order,
         params.showInstructors,
-        params.showCourses
+        params.showCourses,
+        undefined
       );
     });
   });
 
   describe('post review', () => {
     it('should call the service to create a review and return it', async () => {
-      const reviewInDTO = new ReviewInDTO(
-        5,
-        true,
-        'Excellent teaching',
-        REVIEW_DISCRIMINANT.INSTRUCTOR
-      );
-      const mockReview = new ReviewOutDTO(
-        'review1',
-        new Date(),
-        new Date(),
-        5,
-        true,
-        'Excellent teaching',
-        REVIEW_DISCRIMINANT.INSTRUCTOR
-      );
+      const reviewInDTO: ReviewInDTO = {
+        reviewerId: '12345',
+        reviewedId: 'review1',
+        rate: 5,
+        recommended: true,
+        comments: 'Excellent teaching',
+        discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+      };
+
+      const mockReview: ReviewOutDTO = {
+        reviewedId: 'review1',
+        reviewerId: '12345',
+        id: 'id1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        rate: 5,
+        recommended: true,
+        comments: 'Excellent teaching',
+        discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+      };
       userService.postReview.mockResolvedValue(mockReview);
 
       const result = await userController.postReview(reviewInDTO);
@@ -460,7 +472,6 @@ describe('User Controller tests', () => {
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(ReviewOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.postReview).toHaveBeenCalledTimes(1);
@@ -471,40 +482,43 @@ describe('User Controller tests', () => {
   describe('update review', () => {
     it('should call the service to update a review and return it', async () => {
       const reviewId = 'review123';
-      const reviewUpdateDTO = {
+      const reviewUpdateDTO: Partial<ReviewInDTO> = {
         rate: 4,
         comments: 'Updated comment',
-      } as Partial<ReviewInDTO>;
-      const mockReview = new ReviewOutDTO(
-        reviewId,
-        new Date(),
-        new Date(),
-        4,
-        true,
-        'Updated comment',
-        REVIEW_DISCRIMINANT.INSTRUCTOR
-      );
+      };
+      const userId = 'user123';
+      const mockReview: ReviewOutDTO = {
+        id: reviewId,
+        reviewedId: reviewId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        rate: 4,
+        recommended: true,
+        comments: 'Updated comment',
+        discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+        reviewerId: reviewId,
+      };
       userService.updateReview.mockResolvedValue(mockReview);
 
-      const result = await userController.updateReview(reviewId, reviewUpdateDTO);
+      const result = await userController.updateReview(userId, reviewId, reviewUpdateDTO);
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(ReviewOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.updateReview).toHaveBeenCalledTimes(1);
-      expect(userService.updateReview).toHaveBeenCalledWith(reviewId, reviewUpdateDTO);
+      expect(userService.updateReview).toHaveBeenCalledWith(userId, reviewId, reviewUpdateDTO);
     });
   });
 
   describe('delete review', () => {
     it('should call the service to delete a review and return a success message', async () => {
       const reviewId = 'review123';
+      const userId = 'user123';
       userService.deleteReview.mockResolvedValue();
 
-      const result = await userController.deleteReview(reviewId);
+      const result = await userController.deleteReview(userId, reviewId);
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
@@ -513,7 +527,7 @@ describe('User Controller tests', () => {
       expect(result.timestamp).toBeDefined();
 
       expect(userService.deleteReview).toHaveBeenCalledTimes(1);
-      expect(userService.deleteReview).toHaveBeenCalledWith(reviewId);
+      expect(userService.deleteReview).toHaveBeenCalledWith(userId, reviewId);
     });
   });
 
@@ -527,21 +541,19 @@ describe('User Controller tests', () => {
         order: 'asc' as 'asc' | 'desc',
       };
       const timestamp = new Date().toISOString();
-      const mockAccounts = Array.from(
-        { length: 2 },
-        (_, i) =>
-          new LinkedAccountOutDTO(
-            userId,
-            'github',
-            'issuer',
-            `external${i}`,
-            `email${i}@example.com`,
-            false,
-            (i + 1).toString(),
-            new Date(),
-            true
-          )
-      );
+      const mockAccounts: LinkedAccountOutDTO[] = Array.from({ length: 2 }, (_, i) => {
+        return {
+          userId: 'user123',
+          provider: 'github',
+          issuer: 'issuer',
+          idExternal: `external${i}`,
+          email: `email${i}@example.com`,
+          isPrimary: false,
+          idLinkedAccount: `account${i}`,
+          linkedAt: new Date(),
+          emailVerified: true,
+        };
+      });
 
       userService.getLinkedAccounts.mockResolvedValue({
         success: true,
@@ -587,97 +599,102 @@ describe('User Controller tests', () => {
   describe('get linked account', () => {
     it('should call the service to get a linked account and return it', async () => {
       const accountId = 'account123';
-      const mockAccount = new LinkedAccountOutDTO(
-        'user123',
-        'github',
-        'issuer',
-        'external123',
-        'user@example.com',
-        true,
-        accountId,
-        new Date(),
-        true
-      );
+      const userId = 'user123';
+      const mockAccount = {
+        userId,
+        provider: 'github',
+        issuer: 'issuer',
+        idExternal: 'external123',
+        email: 'user@example.com',
+        isPrimary: true,
+        idLinkedAccount: accountId,
+        linkedAt: new Date(),
+        emailVerified: true,
+      };
       userService.getLinkedAccount.mockResolvedValue(mockAccount);
 
-      const result = await userController.getLinkedAccount(accountId);
+      const result = await userController.getLinkedAccount(userId, accountId);
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(LinkedAccountOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.getLinkedAccount).toHaveBeenCalledTimes(1);
-      expect(userService.getLinkedAccount).toHaveBeenCalledWith(accountId);
+      expect(userService.getLinkedAccount).toHaveBeenCalledWith(userId, accountId);
     });
   });
 
   describe('post linked account', () => {
     it('should call the service to create a linked account and return it', async () => {
-      const linkedAccountInDTO = new LinkedAccountInDTO(
-        'user123',
-        'github',
-        'issuer',
-        'external123',
-        'user@example.com',
-        true
-      );
-      const mockAccount = new LinkedAccountOutDTO(
-        'user123',
-        'github',
-        'issuer',
-        'external123',
-        'user@example.com',
-        true,
-        'account123',
-        new Date(),
-        true
-      );
+      const userId = 'user123';
+      const linkedAccountInDTO: LinkedAccountInDTO = {
+        userId,
+        provider: 'github',
+        issuer: 'issuer',
+        idExternal: 'external123',
+        email: 'user@example.com',
+        isPrimary: true,
+      };
+      const mockAccount: LinkedAccountOutDTO = {
+        idLinkedAccount: 'account123',
+        linkedAt: new Date(),
+        emailVerified: true,
+        userId: 'user123',
+        provider: 'github',
+        issuer: 'issuer',
+        idExternal: 'external123',
+        email: 'user@example.com',
+        isPrimary: true,
+      };
       userService.postLinkedAccount.mockResolvedValue(mockAccount);
 
-      const result = await userController.postLinkedAccount(linkedAccountInDTO);
+      const result = await userController.postLinkedAccount(userId, linkedAccountInDTO);
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(LinkedAccountOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.postLinkedAccount).toHaveBeenCalledTimes(1);
-      expect(userService.postLinkedAccount).toHaveBeenCalledWith(linkedAccountInDTO);
+      expect(userService.postLinkedAccount).toHaveBeenCalledWith(userId, linkedAccountInDTO);
     });
   });
 
   describe('update linked account', () => {
     it('should call the service to update a linked account and return it', async () => {
       const accountId = 'account123';
+      const userId = 'user123';
       const linkedAccountUpdateDTO = {
         idExternal: 'newExternal',
       } as Partial<LinkedAccountInDTO>;
-      const mockAccount = new LinkedAccountOutDTO(
-        'user123',
-        'github',
-        'issuer',
-        'newExternal',
-        'user@example.com',
-        true,
-        accountId,
-        new Date(),
-        true
-      );
+      const mockAccount: LinkedAccountOutDTO = {
+        userId,
+        provider: 'github',
+        issuer: 'issuer',
+        idExternal: 'newExternal',
+        email: 'user@example.com',
+        isPrimary: true,
+        idLinkedAccount: accountId,
+        linkedAt: new Date(),
+        emailVerified: true,
+      };
       userService.updateLinkedAccount.mockResolvedValue(mockAccount);
 
-      const result = await userController.updateLinkedAccount(accountId, linkedAccountUpdateDTO);
+      const result = await userController.updateLinkedAccount(
+        userId,
+        accountId,
+        linkedAccountUpdateDTO
+      );
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toBe('Request successful');
-      expect(result.data).toBeInstanceOf(LinkedAccountOutDTO);
       expect(result.timestamp).toBeDefined();
 
       expect(userService.updateLinkedAccount).toHaveBeenCalledTimes(1);
       expect(userService.updateLinkedAccount).toHaveBeenCalledWith(
+        userId,
         accountId,
         linkedAccountUpdateDTO
       );
@@ -687,9 +704,10 @@ describe('User Controller tests', () => {
   describe('delete linked account', () => {
     it('should call the service to delete a linked account and return a success message', async () => {
       const accountId = 'account123';
+      const userId = 'user123';
       userService.deleteLinkedAccount.mockResolvedValue();
 
-      const result = await userController.deleteLinkedAccount(accountId);
+      const result = await userController.deleteLinkedAccount(userId, accountId);
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
@@ -698,7 +716,7 @@ describe('User Controller tests', () => {
       expect(result.timestamp).toBeDefined();
 
       expect(userService.deleteLinkedAccount).toHaveBeenCalledTimes(1);
-      expect(userService.deleteLinkedAccount).toHaveBeenCalledWith(accountId);
+      expect(userService.deleteLinkedAccount).toHaveBeenCalledWith(userId, accountId);
     });
   });
 

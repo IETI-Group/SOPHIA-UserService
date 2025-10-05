@@ -73,7 +73,8 @@ export default class UserServiceImpl implements UserService {
     _sort: string | undefined,
     _order: 'asc' | 'desc',
     _showInstructors?: boolean,
-    _showCourses?: boolean
+    _showCourses?: boolean,
+    _reviewedId?: string
   ): Promise<PaginatedReviews> {
     throw new Error('Method not implemented.');
   }
@@ -81,12 +82,13 @@ export default class UserServiceImpl implements UserService {
     throw new Error('Method not implemented.');
   }
   async updateReview(
+    _userId: string,
     _reviewId: string,
-    _reviewInstructor: Partial<ReviewInDTO>
+    _reviewedDTO: Partial<ReviewInDTO>
   ): Promise<ReviewOutDTO> {
     throw new Error('Method not implemented.');
   }
-  async deleteReview(_reviewId: string): Promise<void> {
+  async deleteReview(_userId: string, _reviewId: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
   async getLinkedAccounts(
@@ -98,19 +100,23 @@ export default class UserServiceImpl implements UserService {
   ): Promise<PaginatedLinkedAccounts> {
     throw new Error('Method not implemented.');
   }
-  async getLinkedAccount(_accountId: string): Promise<LinkedAccountOutDTO> {
+  async getLinkedAccount(_userId: string, _accountId: string): Promise<LinkedAccountOutDTO> {
     throw new Error('Method not implemented.');
   }
-  async postLinkedAccount(_linkedAccountIn: LinkedAccountInDTO): Promise<LinkedAccountOutDTO> {
+  async postLinkedAccount(
+    _userId: string,
+    _linkedAccountIn: LinkedAccountInDTO
+  ): Promise<LinkedAccountOutDTO> {
     throw new Error('Method not implemented.');
   }
   async updateLinkedAccount(
+    _userId: string,
     _accountId: string,
     _linkedAccountUpdate: Partial<LinkedAccountInDTO>
   ): Promise<LinkedAccountOutDTO> {
     throw new Error('Method not implemented.');
   }
-  async deleteLinkedAccount(_accountId: string): Promise<void> {
+  async deleteLinkedAccount(_userId: string, _accountId: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }

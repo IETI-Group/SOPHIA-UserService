@@ -1,71 +1,6 @@
-import type { Request } from 'express';
 import { body, param, query, type ValidationChain } from 'express-validator';
-import {
-  type ApiRequestQuery,
-  UserInDTO,
-  type UsersQuery,
-  type UserUpdateDTO,
-} from '../models/index.js';
 import { APP_CONFIG } from './constants.js';
-
-export const parseUsersQuery = (req: Request): UsersQuery => {
-  const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
-  const size = req.query.size
-    ? Number.parseInt(req.query.size as string, 10)
-    : APP_CONFIG.DEFAULT_PAGE_SIZE;
-  const sort = req.query.sort as string;
-  const order = (req.query.order as 'asc' | 'desc') || APP_CONFIG.DEFAULT_SORT_ORDER;
-  const firstName = req.query.firstName as string;
-  const lastName = req.query.lastName as string;
-  const lightDTO = req.query.light_dto ? req.query.light_dto === 'true' : undefined;
-
-  // Validar fechas
-  const birthDayFrom = req.query.birthDayFrom
-    ? new Date(req.query.birthDayFrom as string)
-    : undefined;
-  const birthDayTo = req.query.birthDayTo ? new Date(req.query.birthDayTo as string) : undefined;
-
-  if (birthDayFrom && Number.isNaN(birthDayFrom.getTime())) {
-    throw new Error('Invalid birthDayFrom date format');
-  }
-  if (birthDayTo && Number.isNaN(birthDayTo.getTime())) {
-    throw new Error('Invalid birthDayTo date format');
-  }
-  if (birthDayFrom && birthDayTo && birthDayFrom > birthDayTo) {
-    throw new Error('birthDayFrom must be before birthDayTo');
-  }
-
-  return { page, size, sort, order, lightDTO, firstName, lastName, birthDayFrom, birthDayTo };
-};
-
-export const parsePaginationQuery = (req: Request): ApiRequestQuery => {
-  const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
-  const size = req.query.size
-    ? Number.parseInt(req.query.size as string, 10)
-    : APP_CONFIG.DEFAULT_PAGE_SIZE;
-  const sort = req.query.sort ? (req.query.sort as string) : undefined;
-  const order = (req.query.order as 'asc' | 'desc') || APP_CONFIG.DEFAULT_SORT_ORDER;
-  return { page, size, sort, order };
-};
-
-export const parseUserInBody = (req: Request): UserInDTO => {
-  return new UserInDTO(
-    req.body.firstName,
-    req.body.lastName,
-    req.body.email,
-    new Date(req.body.birthDate)
-  );
-};
-
-export const parseUserUpdateInBody = (req: Request): Partial<UserUpdateDTO> => {
-  const userUpdate: Partial<UserUpdateDTO> = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    birthDate: req.body.birthDate ? new Date(req.body.birthDate) : undefined,
-  } as Partial<UserUpdateDTO>;
-  return userUpdate;
-};
+import { LEARNING_STYLES, PACE_PREFERENCE, REVIEW_DISCRIMINANT } from './types.js';
 
 export const usersParams: ValidationChain[] = [
   query('firstName').optional().isString().withMessage('First name must be a string'),
@@ -96,6 +31,37 @@ export const paginationParams: ValidationChain[] = [
   query('order').optional().isIn(['asc', 'desc']).withMessage('Order must be either asc or desc'),
 ];
 
+export const reviewsParams: ValidationChain[] = [
+  query('showInstructors')
+    .optional()
+    .isBoolean()
+    .withMessage('showInstructors must be a boolean value'),
+  query('showCourses').optional().isBoolean().withMessage('showCourses must be a boolean value'),
+  query('reviewedId').optional().isString().notEmpty().withMessage('reviewedId must be a string'),
+];
+
+export const batchUsers: ValidationChain[] = [
+  body('users')
+    .isArray({ min: 1, max: APP_CONFIG.MAX_BATCH_USERS })
+    .withMessage('Users must be a non-empty array'),
+  body('users.*').isString().notEmpty().withMessage('Each user ID must be a non-empty string'),
+];
+
+export const reviewBodyInDTO = (optional = false): ValidationChain[] => {
+  return [
+    body('reviewedId')
+      .isString()
+      .notEmpty()
+      .withMessage('Reviewed ID is required and must be a string'),
+    body('rate').isInt({ min: 1, max: 5 }).withMessage('Rate must be an integer between 1 and 5'),
+    body('comments').isString().optional().withMessage('Comments must be a string'),
+    body('discriminant')
+      .isIn(Object.values(REVIEW_DISCRIMINANT))
+      .withMessage(`Discriminant must be one of: ${Object.values(REVIEW_DISCRIMINANT).join(', ')}`),
+    body('recommended').isBoolean().withMessage('Recommended must be a boolean value'),
+  ].map((validation) => (optional ? validation.optional() : validation));
+};
+
 export const stringParam = (
   pathVariable: string = 'id',
   message: string,
@@ -118,6 +84,36 @@ export const booleanQuery = (
   optional: boolean = false
 ): ValidationChain => {
   return query(queryName).isBoolean().withMessage(message).optional(optional);
+};
+
+export const learningPathInDTO = (optional = false): ValidationChain[] => {
+  return [
+    body('primaryStyle')
+      .isIn([LEARNING_STYLES.VISUAL, LEARNING_STYLES.AUDITORY, LEARNING_STYLES.KINESTHETIC])
+      .notEmpty()
+      .withMessage('Primary style is required and must be a string')
+      .isLength({ max: 50 })
+      .withMessage('Primary style must be at most 50 characters long'),
+    body('secondaryStyle')
+      .isIn([LEARNING_STYLES.VISUAL, LEARNING_STYLES.AUDITORY, LEARNING_STYLES.KINESTHETIC])
+      .notEmpty()
+      .withMessage('Secondary style is required and must be a string')
+      .isLength({ max: 50 })
+      .withMessage('Secondary style must be at most 50 characters long'),
+    body('pacePreference')
+      .isIn([PACE_PREFERENCE.SLOW, PACE_PREFERENCE.NORMAL, PACE_PREFERENCE.FAST])
+      .notEmpty()
+      .withMessage('Pace preference is required and must be a string')
+      .isLength({ max: 50 })
+      .withMessage('Pace preference must be at most 50 characters long'),
+    body('interactivityPreference')
+      .isNumeric()
+      .notEmpty()
+      .withMessage('Interactivity preference is required and must be a number'),
+    body('gamificationEnabled')
+      .isBoolean()
+      .withMessage('Gamification enabled must be a boolean value'),
+  ].map((validation) => (optional ? validation.optional() : validation));
 };
 
 export const userInDTO = (partial = false): ValidationChain[] => {
@@ -143,9 +139,25 @@ export const userInDTO = (partial = false): ValidationChain[] => {
   ].map((validation) => (partial ? validation.optional() : validation));
 };
 
-export const batchUsers: ValidationChain[] = [
-  body('users')
-    .isArray({ min: 1, max: APP_CONFIG.MAX_BATCH_USERS })
-    .withMessage('Users must be a non-empty array'),
-  body('users.*').isString().notEmpty().withMessage('Each user ID must be a non-empty string'),
-];
+export const linkedAccountInDTO = (optional = false): ValidationChain[] => {
+  return [
+    body('provider')
+      .isString()
+      .notEmpty()
+      .withMessage('Provider is required and must be a string')
+      .isLength({ min: 2, max: 100 }),
+    body('issuer')
+      .isString()
+      .notEmpty()
+      .withMessage('Issuer is required and must be a string')
+      .isLength({ min: 2, max: 100 }),
+    body('idExternal')
+      .isString()
+      .notEmpty()
+      .withMessage('External ID is required and must be a string')
+      .isLength({ max: 255 })
+      .withMessage('External ID must be at most 255 characters long'),
+    body('email').isEmail().withMessage('A valid email is required'),
+    body('isPrimary').isBoolean().withMessage('isPrimary is required and must be a boolean value'),
+  ].map((validation) => (optional ? validation.optional() : validation));
+};

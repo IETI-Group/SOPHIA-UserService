@@ -103,7 +103,8 @@ export default class UserController {
     sort: string | undefined,
     order: 'asc' | 'desc',
     showInstructors?: boolean,
-    showCourses?: boolean
+    showCourses?: boolean,
+    reviewedId?: string
   ): Promise<PaginatedReviews> {
     const response = await this.userService.getUserReviews(
       reviewerId,
@@ -112,7 +113,8 @@ export default class UserController {
       sort,
       order,
       showInstructors,
-      showCourses
+      showCourses,
+      reviewedId
     );
     return response;
   }
@@ -121,14 +123,15 @@ export default class UserController {
     return parseApiResponse(response);
   }
   public async updateReview(
+    userId: string,
     reviewId: string,
-    reviewInstructor: Partial<ReviewInDTO>
+    reviewedDTO: Partial<ReviewInDTO>
   ): Promise<ApiResponse<ReviewOutDTO>> {
-    const response = await this.userService.updateReview(reviewId, reviewInstructor);
+    const response = await this.userService.updateReview(userId, reviewId, reviewedDTO);
     return parseApiResponse(response);
   }
-  public async deleteReview(reviewId: string): Promise<ApiResponse<string>> {
-    await this.userService.deleteReview(reviewId);
+  public async deleteReview(userId: string, reviewId: string): Promise<ApiResponse<string>> {
+    await this.userService.deleteReview(userId, reviewId);
     return parseApiResponse(`Review with id ${reviewId} deleted successfully`);
   }
   public async getLinkedAccounts(
@@ -141,25 +144,37 @@ export default class UserController {
     const response = await this.userService.getLinkedAccounts(userId, page, size, sort, order);
     return response;
   }
-  public async getLinkedAccount(accountId: string): Promise<ApiResponse<LinkedAccountOutDTO>> {
-    const response = await this.userService.getLinkedAccount(accountId);
+  public async getLinkedAccount(
+    userId: string,
+    accountId: string
+  ): Promise<ApiResponse<LinkedAccountOutDTO>> {
+    const response = await this.userService.getLinkedAccount(userId, accountId);
     return parseApiResponse(response);
   }
   public async postLinkedAccount(
+    userId: string,
     linkedAccountIn: LinkedAccountInDTO
   ): Promise<ApiResponse<LinkedAccountOutDTO>> {
-    const response = await this.userService.postLinkedAccount(linkedAccountIn);
+    const response = await this.userService.postLinkedAccount(userId, linkedAccountIn);
     return parseApiResponse(response);
   }
   public async updateLinkedAccount(
+    userId: string,
     accountId: string,
     linkedAccountUpdate: Partial<LinkedAccountInDTO>
   ): Promise<ApiResponse<LinkedAccountOutDTO>> {
-    const response = await this.userService.updateLinkedAccount(accountId, linkedAccountUpdate);
+    const response = await this.userService.updateLinkedAccount(
+      userId,
+      accountId,
+      linkedAccountUpdate
+    );
     return parseApiResponse(response);
   }
-  public async deleteLinkedAccount(accountId: string): Promise<ApiResponse<string>> {
-    await this.userService.deleteLinkedAccount(accountId);
+  public async deleteLinkedAccount(
+    userId: string,
+    accountId: string
+  ): Promise<ApiResponse<string>> {
+    await this.userService.deleteLinkedAccount(userId, accountId);
     return parseApiResponse(`Linked account with id ${accountId} deleted successfully`);
   }
 
