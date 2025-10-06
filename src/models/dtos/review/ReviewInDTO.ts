@@ -1,6 +1,6 @@
 import type { REVIEW_DISCRIMINANT } from '../../../utils/types.js';
 
-export default interface ReviewInDTO {
+interface ReviewInDTO {
   reviewerId: string;
   reviewedId: string;
   discriminant: REVIEW_DISCRIMINANT;
@@ -8,3 +8,6 @@ export default interface ReviewInDTO {
   recommended: boolean;
   comments?: string;
 }
+
+export type { ReviewInDTO };
+export default ReviewInDTO;

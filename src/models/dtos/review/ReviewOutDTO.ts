@@ -1,8 +1,11 @@
 import type ReviewInDTO from './ReviewInDTO.js';
 
-export default interface ReviewOutDTO extends ReviewInDTO {
+interface ReviewOutDTO extends ReviewInDTO {
   reviewerId: string;
   id: string;
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type { ReviewOutDTO };
+export default ReviewOutDTO;

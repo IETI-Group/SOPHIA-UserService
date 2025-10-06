@@ -2,6 +2,7 @@ import cors from 'cors';
 import express, { type Application } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { checkDatabaseConnection } from './config/db.js';
 import { envConfig } from './config/env.config.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import routes from './routes/index.js';
@@ -48,6 +49,18 @@ class App {
 
     // Configurar trust proxy si está detrás de un proxy/load balancer
     this.app.set('trust proxy', 1);
+    // check database connection
+
+    if (!envConfig.server.isTest) {
+      logger.info('Checking database connection...');
+      checkDatabaseConnection().then((isConnected) => {
+        if (isConnected) {
+          logger.info('Database connection established');
+        } else {
+          logger.error('Failed to connect to the database');
+        }
+      });
+    }
   }
 
   private routes(): void {

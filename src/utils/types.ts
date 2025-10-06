@@ -42,3 +42,15 @@ export enum REVIEW_DISCRIMINANT {
   INSTRUCTOR = 'instructor',
   COURSE = 'course',
 }
+
+export enum ROLE_STATUS {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+}
+
+export enum VERIFICATION_STATUS {
+  VERIFIED = 'verified',
+  PENDING = 'pending',
+  REJECTED = 'rejected',
+}

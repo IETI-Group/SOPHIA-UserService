@@ -35,9 +35,11 @@ export const envConfig = {
   database: {
     url: process.env.DATABASE_URL,
     host: process.env.DB_HOST || 'localhost',
-
-    port: Number.parseInt(process.env.DB_PORT || '27017', 10),
-    name: process.env.DB_NAME || 'sophia-users',
+    ssl: process.env.DB_SSL === 'true' || false,
+    port: Number.parseInt(process.env.DB_PORT || '5433', 10),
+    name: process.env.DB_NAME || 'dev_db',
+    user: process.env.DB_USER || 'dev_user',
+    password: process.env.DB_PASSWORD || 'dev_password',
   },
 
   jwt: {

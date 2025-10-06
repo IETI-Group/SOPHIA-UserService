@@ -28,7 +28,7 @@ const startServer = (): void => {
       logger.info(`🌍 Environment: ${envConfig.server.nodeEnv}`);
       logger.info(`📡 Server running on port ${PORT}`);
       logger.info(
-        `🔗 Health check: http://localhost:${PORT}${envConfig.api.prefix}${envConfig.api.version}/health`
+        `🔗 Health check: http://localhost:${PORT}${envConfig.api.prefix}/${envConfig.api.version}/health`
       );
       logger.info(`🏠 Home: http://localhost:${PORT}/`);
     });

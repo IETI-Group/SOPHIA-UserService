@@ -1,4 +1,4 @@
-export default interface LinkedAccountInDTO {
+interface LinkedAccountInDTO {
   userId: string;
   provider: string;
   issuer: string;
@@ -6,3 +6,6 @@ export default interface LinkedAccountInDTO {
   email: string;
   isPrimary: boolean;
 }
+
+export type { LinkedAccountInDTO };
+export default LinkedAccountInDTO;

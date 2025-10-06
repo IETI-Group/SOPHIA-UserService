@@ -1,6 +1,6 @@
 import type ApiResponse from '../response/ApiResponse.js';
 
-export default interface PaginatedResponse<T> extends ApiResponse<T[]> {
+interface PaginatedResponse<T> extends ApiResponse<T[]> {
   pagination: {
     page: number;
     limit: number;
@@ -10,3 +10,6 @@ export default interface PaginatedResponse<T> extends ApiResponse<T[]> {
     hasPrev: boolean;
   };
 }
+
+export type { PaginatedResponse };
+export default PaginatedResponse;
