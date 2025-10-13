@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import * as schema from '../db/schema.js';
+import { type DBDrizzleProvider, schema } from '../db/index.js';
 import envConfig from './env.config.js';
 
 /**
@@ -22,7 +22,7 @@ export const pool = new Pool({
  * Drizzle ORM client with full schema
  * Includes automatic typing and relations
  */
-export const db = drizzle(pool, { schema });
+export const db: DBDrizzleProvider = drizzle(pool, { schema });
 
 /**
  * Function to check database connection

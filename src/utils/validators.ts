@@ -17,18 +17,22 @@ export const usersParams: ValidationChain[] = [
 
 const VALID_SORT_FIELDS = ['firstName', 'lastName', 'email', 'birthDate', 'createdAt', 'updatedAt'];
 
-export const paginationParams: ValidationChain[] = [
-  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
-  query('size')
-    .optional()
-    .isInt({ min: 1, max: APP_CONFIG.MAX_PAGE_SIZE })
-    .withMessage('Size must be a positive integer'),
+export const sortingParams: ValidationChain[] = [
   query('sort')
     .optional()
     .isString()
     .isIn(VALID_SORT_FIELDS)
     .withMessage(`Sort must be one of: ${VALID_SORT_FIELDS.join(', ')}`),
   query('order').optional().isIn(['asc', 'desc']).withMessage('Order must be either asc or desc'),
+];
+
+export const paginationParams: ValidationChain[] = [
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('size')
+    .optional()
+    .isInt({ min: 1, max: APP_CONFIG.MAX_PAGE_SIZE })
+    .withMessage('Size must be a positive integer'),
+  ...sortingParams,
 ];
 
 export const reviewsParams: ValidationChain[] = [

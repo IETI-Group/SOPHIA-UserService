@@ -68,12 +68,14 @@ export const users = pgTable(
     last_name: varchar('last_name', { length: 100 }).notNull(),
     bio: text('bio'),
     created_at: timestamp('created_at').defaultNow().notNull(),
+    birth_date: timestamp('birth_date').notNull(),
     updated_at: timestamp('updated_at').$onUpdate(() => new Date()),
   },
   (table) => ({
     emailIdx: uniqueIndex('users_email_idx').on(table.email),
     nameIdx: index('users_name_idx').on(table.first_name, table.last_name),
     createdAtIdx: index('users_created_at_idx').on(table.created_at),
+    birthDateIdx: index('users_birth_date_idx').on(table.birth_date),
   })
 );
 

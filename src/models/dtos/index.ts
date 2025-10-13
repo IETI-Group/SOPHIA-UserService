@@ -6,6 +6,7 @@ import type { PaginatedLinkedAccounts } from './pagination/PaginatedLinkedAccoun
 import type { PaginatedResponse } from './pagination/PaginatedResponse.js';
 import type { PaginatedReviews } from './pagination/PaginatedReviews.js';
 import type { PaginatedUsers } from './pagination/PaginatedUsers.js';
+import type { ApiRequestBatchUsers } from './request/ApiRequestBatchUsersQuery.js';
 import type { ApiRequestQuery } from './request/ApiRequestQuery.js';
 import type { UsersQuery } from './request/UsersQuery.js';
 import type { ApiErrorResponse } from './response/ApiErrorRespnse.js';
@@ -36,4 +37,5 @@ export type {
   PaginatedResponse,
   ApiResponse,
   ApiErrorResponse,
+  ApiRequestBatchUsers,
 };

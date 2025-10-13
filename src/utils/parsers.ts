@@ -1,5 +1,6 @@
 import type { Request } from 'express';
 import type {
+  ApiRequestBatchUsers,
   ApiRequestQuery,
   ApiResponse,
   LearningPathInDTO,
@@ -78,6 +79,19 @@ export const parsePaginationQuery = (req: Request): ApiRequestQuery => {
   const sort = req.query.sort ? (req.query.sort as string) : undefined;
   const order = (req.query.order as 'asc' | 'desc') || APP_CONFIG.DEFAULT_SORT_ORDER;
   return { page, size, sort, order };
+};
+
+export const parseBatchUsersQuery = (req: Request): ApiRequestBatchUsers => {
+  const users: string[] = (req.query.users as string[]) || [];
+  const size = users.length;
+  const page = 1; // It should return the same amount (or less) of users as the given ids, it should not truncate the response, it reduces complexity on client side
+  if (size > APP_CONFIG.MAX_BATCH_USERS) {
+    throw new Error(`Maximum number of users exceeded. Max is ${APP_CONFIG.MAX_BATCH_USERS}`);
+  }
+  const lightDTO = req.query.light_dto ? req.query.light_dto === 'true' : undefined;
+  const sort = req.query.sort ? (req.query.sort as string) : undefined;
+  const order = (req.query.order as 'asc' | 'desc') || APP_CONFIG.DEFAULT_SORT_ORDER;
+  return { page, users, sort, order, size, lightDTO };
 };
 
 export const parseUserInBody = (req: Request): UserInDTO => {

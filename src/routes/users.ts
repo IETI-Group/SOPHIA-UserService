@@ -4,6 +4,7 @@ import container from '../config/diContainer.js';
 import type UserController from '../controllers/UserController.js';
 import type { UserInDTO, UsersQuery } from '../models/index.js';
 import {
+  parseBatchUsersQuery,
   parseLearningPathInBody,
   parseLearningPathUpdateInBody,
   parseLinkedAccountInBody,
@@ -25,6 +26,7 @@ import {
   paginationParams,
   reviewBodyInDTO,
   reviewsParams,
+  sortingParams,
   stringParam,
   userInDTO,
   usersParams,
@@ -119,19 +121,21 @@ router.get(
 
 /**
  * @route   POST /api/v1/users/batch
- * @desc    Get users by an array of IDs with pagination
+ * @desc    Get users by an array of IDs
  * @access  Public
  */
-router.post('/batch', [...batchUsers, ...paginationParams], async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    throw new Error('Validation error: Invalid users array');
+router.post(
+  '/batch',
+  [...batchUsers, ...sortingParams, booleanQuery('light_dto', 'Invalid light DTO value', true)],
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      throw new Error('Validation error: Invalid users array');
+    }
+    const { users, page, size, sort, order, lightDTO } = parseBatchUsersQuery(req);
+    const userList = await userController.getUsersByIds(users, page, size, sort, order, lightDTO);
+    res.json(userList);
   }
-
-  const { users } = req.body as { users: string[] };
-  const { page, size, sort, order } = parsePaginationQuery(req);
-  const userList = await userController.getUsersByIds(users, page, size, sort, order, false);
-  res.json(userList);
-});
+);
 
 /**
  * @route   POST /api/v1/users
