@@ -180,8 +180,18 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
 
     return mappedUser;
   }
-  public async getUserByEmail(_email: string, _lightDTO?: boolean): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  public async getUserByEmail(email: string, lightDTO = true): Promise<UserOutDTO> {
+    const baseQuery = this.getUsersBaseQuery();
+    const usersResult = await baseQuery.where(eq(users.email, email));
+
+    if (usersResult.length === 0) {
+      throw new Error(`User with email ${email} not found`);
+    }
+
+    const user = usersResult[0];
+    const mappedUser = this.parseUsersToDTOs([user], lightDTO)[0];
+
+    return mappedUser;
   }
   userExists(_userId: string): Promise<boolean> {
     throw new Error('Method not implemented.');
