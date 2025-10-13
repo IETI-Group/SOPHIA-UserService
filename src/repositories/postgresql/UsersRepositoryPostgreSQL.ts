@@ -1,5 +1,5 @@
 import type { AnyColumn } from 'drizzle-orm';
-import { and, asc, desc, eq, gte, ilike, lte, type SQL, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, inArray, lte, type SQL, sql } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
 import { roles, users, users_roles } from '../../db/schema.js';
 import type {
@@ -131,8 +131,40 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
     };
   }
 
-  public async getUsersByIds(_ids: string[]): Promise<PaginatedUsers> {
-    throw new Error('Method not implemented.');
+  public async getUsersByIds(ids: string[], lightDTO = true): Promise<PaginatedUsers> {
+    const MAX_IDS = 100;
+
+    if (ids.length > MAX_IDS) {
+      throw new Error(`Cannot query more than ${MAX_IDS} users at once. Received: ${ids.length}`);
+    }
+
+    const baseQuery = this.getUsersBaseQuery();
+    const usersResult = await baseQuery
+      .where(inArray(users.id_user, ids))
+      .orderBy(asc(users.first_name))
+      .limit(ids.length)
+      .offset(0);
+
+    const countBaseQuery = this.getUsersCountBaseQuery();
+    const totalResult = await countBaseQuery.where(inArray(users.id_user, ids));
+    const total = totalResult[0]?.count ?? 0;
+
+    const mappedUsers: UserOutDTO[] = this.parseUsersToDTOs(usersResult, lightDTO);
+
+    return {
+      success: true,
+      message: 'Users retrieved successfully',
+      data: mappedUsers,
+      timestamp: new Date().toISOString(),
+      pagination: {
+        page: 1,
+        limit: ids.length,
+        total,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      },
+    };
   }
 
   public async getUserById(_userId: string, _lightDTO?: boolean): Promise<UserOutDTO> {

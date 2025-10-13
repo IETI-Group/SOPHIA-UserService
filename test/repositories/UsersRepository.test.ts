@@ -629,7 +629,7 @@ describe('Users Repository', async () => {
         from: vi.fn().mockReturnValue(countInnerJoinMock),
       } as unknown as ReturnType<typeof drizzleClient.select>);
 
-    const result = await repository.getUsersByIds(ids);
+    const result = await repository.getUsersByIds(ids, false);
 
     expect(result.success).toBe(true);
     expect(result.data).toHaveLength(2);
