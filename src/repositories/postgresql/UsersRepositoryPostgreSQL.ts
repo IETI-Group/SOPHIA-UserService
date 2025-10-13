@@ -242,14 +242,74 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
       throw error;
     }
   }
-  public async updateUser(
-    _userId: string,
-    _userInDTO: Partial<UserUpdateDTO>
-  ): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  public async updateUser(userId: string, userInDTO: Partial<UserUpdateDTO>): Promise<UserOutDTO> {
+    // Validar que se proporcionen campos para actualizar
+    if (!userInDTO || Object.keys(userInDTO).length === 0) {
+      throw new Error('No fields to update provided');
+    }
+
+    const allowedFields = ['email', 'firstName', 'lastName', 'birthDate', 'bio'];
+    const providedFields = Object.keys(userInDTO);
+    const invalidFields = providedFields.filter((field) => !allowedFields.includes(field));
+
+    if (invalidFields.length > 0) {
+      throw new Error(`Invalid fields provided: ${invalidFields.join(', ')}`);
+    }
+
+    try {
+      const updateValues: {
+        email?: string;
+        first_name?: string;
+        last_name?: string;
+        birth_date?: Date;
+        bio?: string;
+      } = {};
+
+      if (userInDTO.email !== undefined) updateValues.email = userInDTO.email;
+      if (userInDTO.firstName !== undefined) updateValues.first_name = userInDTO.firstName;
+      if (userInDTO.lastName !== undefined) updateValues.last_name = userInDTO.lastName;
+      if (userInDTO.birthDate !== undefined) updateValues.birth_date = userInDTO.birthDate;
+      if (userInDTO.bio !== undefined) updateValues.bio = userInDTO.bio;
+
+      const [updatedUser] = await this.client
+        .update(users)
+        .set(updateValues)
+        .where(eq(users.id_user, userId))
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error(`User with id ${userId} not found`);
+      }
+
+      const heavyDTO: UserHeavyOutDTO = {
+        userId: updatedUser.id_user,
+        role: (updatedUser as unknown as { role: ROLE }).role || ROLE.STUDENT,
+        email: updatedUser.email,
+        firstName: updatedUser.first_name,
+        lastName: updatedUser.last_name,
+        bio: updatedUser.bio || '',
+        birthDate: updatedUser.birth_date,
+        createdAt: updatedUser.created_at,
+        updatedAt: updatedUser.updated_at,
+      };
+
+      return heavyDTO;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate key')) {
+        throw new Error(`User with email ${userInDTO.email} already exists`);
+      }
+      throw error;
+    }
   }
-  public async deleteUser(_userId: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  public async deleteUser(userId: string): Promise<void> {
+    const [deletedUser] = await this.client
+      .delete(users)
+      .where(eq(users.id_user, userId))
+      .returning();
+
+    if (!deletedUser) {
+      throw new Error(`User with id ${userId} not found`);
+    }
   }
 
   private async verifyAndGetStudentRole(): Promise<{
