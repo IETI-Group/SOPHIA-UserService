@@ -5,11 +5,13 @@ import { roles, users, users_roles } from '../../db/schema.js';
 import type {
   FiltersUser,
   PaginatedUsers,
+  UserHeavyOutDTO,
   UserInDTO,
   UserOutDTO,
   UserUpdateDTO,
 } from '../../models/index.js';
-import type { ROLE, ValidUserSortFields } from '../../utils/types.js';
+import type { ValidUserSortFields } from '../../utils/types.js';
+import { ROLE } from '../../utils/types.js';
 import type { UsersRepository } from '../UsersRepository.js';
 
 export class UsersRepositoryPostgreSQL implements UsersRepository {
@@ -201,8 +203,38 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
 
     return result.length > 0;
   }
-  public async postUser(_userDTO: UserInDTO): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  // TODO verify the student role before returning
+  public async postUser(userDTO: UserInDTO): Promise<UserOutDTO> {
+    try {
+      const [createdUser] = await this.client
+        .insert(users)
+        .values({
+          email: userDTO.email,
+          first_name: userDTO.firstName,
+          last_name: userDTO.lastName,
+          birth_date: userDTO.birthDate,
+        })
+        .returning();
+
+      const heavyDTO: UserHeavyOutDTO = {
+        userId: createdUser.id_user,
+        role: ROLE.STUDENT,
+        email: createdUser.email,
+        firstName: createdUser.first_name,
+        lastName: createdUser.last_name,
+        bio: createdUser.bio || '',
+        birthDate: createdUser.birth_date,
+        createdAt: createdUser.created_at,
+        updatedAt: createdUser.updated_at,
+      };
+
+      return heavyDTO;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate key')) {
+        throw new Error(`User with email ${userDTO.email} already exists`);
+      }
+      throw error;
+    }
   }
   public async updateUser(
     _userId: string,
