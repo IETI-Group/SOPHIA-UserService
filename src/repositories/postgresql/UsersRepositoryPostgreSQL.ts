@@ -193,8 +193,13 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
 
     return mappedUser;
   }
-  userExists(_userId: string): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  public async userExists(userId: string): Promise<boolean> {
+    const result = await this.client
+      .select({ id_user: users.id_user })
+      .from(users)
+      .where(eq(users.id_user, userId));
+
+    return result.length > 0;
   }
   public async postUser(_userDTO: UserInDTO): Promise<UserOutDTO> {
     throw new Error('Method not implemented.');
