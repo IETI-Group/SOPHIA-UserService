@@ -203,7 +203,6 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
 
     return result.length > 0;
   }
-  // TODO verify the student role before returning
   public async postUser(userDTO: UserInDTO): Promise<UserOutDTO> {
     try {
       const [createdUser] = await this.client
@@ -215,6 +214,13 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
           birth_date: userDTO.birthDate,
         })
         .returning();
+
+      const studentRole = await this.verifyAndGetStudentRole();
+
+      await this.client.insert(users_roles).values({
+        user_id: createdUser.id_user,
+        role_id: studentRole.id_role,
+      });
 
       const heavyDTO: UserHeavyOutDTO = {
         userId: createdUser.id_user,
@@ -244,6 +250,28 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
   }
   public async deleteUser(_userId: string): Promise<void> {
     throw new Error('Method not implemented.');
+  }
+
+  private async verifyAndGetStudentRole(): Promise<{
+    id_role: string;
+    name: ROLE;
+  }> {
+    const [existingRole] = await this.client
+      .select()
+      .from(roles)
+      .where(eq(roles.name, ROLE.STUDENT))
+      .limit(1);
+
+    if (existingRole) {
+      return existingRole;
+    }
+
+    const [newRole] = await this.client
+      .insert(roles)
+      .values({ name: ROLE.STUDENT, description: 'Student role created by default.' })
+      .returning();
+
+    return newRole;
   }
 }
 

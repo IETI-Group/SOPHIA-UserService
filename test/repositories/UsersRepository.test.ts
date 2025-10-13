@@ -140,7 +140,6 @@ describe('Users Repository', async () => {
     addMockData(5, 'Common name');
     addMockData(10);
 
-    // Filtrar los datos mockeados para simular el comportamiento del filtro
     usersMockData = usersMockData.filter((user) => user.first_name === 'Common name');
     setupMocks(true);
 
@@ -196,7 +195,6 @@ describe('Users Repository', async () => {
       birthDateFrom: null,
     };
     addMockData(5);
-    // Invertir el orden para simular DESC
     usersMockData.reverse();
     setupMocks(false);
 
@@ -261,13 +259,11 @@ describe('Users Repository', async () => {
       birthDateTo: null,
       birthDateFrom: null,
     };
-    // Simular 25 usuarios totales, pero solo devolver 5 de la página 2
     addMockData(5);
     const totalCount = 25;
     const page = 2;
     const size = 5;
 
-    // Modificar setupMocks para manejar el count diferente
     const countMockData = [{ count: totalCount }];
     const orderByMock = {
       limit: vi.fn().mockReturnValue({
@@ -344,7 +340,6 @@ describe('Users Repository', async () => {
       birthDateTo: null,
       birthDateFrom: null,
     };
-    // No agregar datos
     setupMocks(false);
 
     const result = await repository.getUsers(1, 10, filters, 'first_name', 'asc', true);
@@ -393,7 +388,6 @@ describe('Users Repository', async () => {
 
     expect(result.userId).toBe(userId);
     expect(result.role).toBe(ROLE.STUDENT);
-    // Light DTO no debe tener email, firstName, etc.
     expect('email' in result).toBe(false);
   });
 
@@ -745,15 +739,46 @@ describe('Users Repository', async () => {
       role: ROLE.STUDENT,
     };
 
-    const insertMock = {
+    const studentRole = {
+      id_role: 'role-123',
+      name: ROLE.STUDENT,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    const userInsertMock = {
       values: vi.fn().mockReturnValue({
         returning: vi.fn().mockResolvedValue([createdUser]),
       }),
     };
 
-    drizzleClient.insert.mockReturnValue(
-      insertMock as unknown as ReturnType<typeof drizzleClient.insert>
+    const roleSelectMock = {
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([studentRole]),
+        }),
+      }),
+    };
+
+    const userRoleInsertMock = {
+      values: vi.fn().mockResolvedValue([
+        {
+          id_user_role: 'user-role-123',
+          user_id: '123',
+          role_id: 'role-123',
+        },
+      ]),
+    };
+
+    drizzleClient.select.mockReturnValue(
+      roleSelectMock as unknown as ReturnType<typeof drizzleClient.select>
     );
+
+    drizzleClient.insert
+      .mockReturnValueOnce(userInsertMock as unknown as ReturnType<typeof drizzleClient.insert>)
+      .mockReturnValueOnce(
+        userRoleInsertMock as unknown as ReturnType<typeof drizzleClient.insert>
+      );
 
     const result = await repository.postUser(newUser);
 
