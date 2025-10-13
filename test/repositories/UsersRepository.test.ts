@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep, mockReset } from 'vitest-mock-extended';
 import type { DBDrizzleProvider } from '../../src/db/DBDrizzleProvider.js';
-import type { FiltersUser, UserHeavyOutDTO } from '../../src/models/index.js';
+import type {
+  FiltersUser,
+  UserHeavyOutDTO,
+  UserInDTO,
+  UserUpdateDTO,
+} from '../../src/models/index.js';
 import { UsersRepositoryPostgreSQL } from '../../src/repositories/postgresql/UsersRepositoryPostgreSQL.js';
 import { ROLE } from '../../src/utils/types.js';
 
@@ -356,45 +361,556 @@ describe('Users Repository', async () => {
     });
   });
 
-  it('Should return user by ID with light DTO by default', async () => {});
+  it('Should return user by ID with light DTO by default', async () => {
+    const userId = '123';
+    const userMockData = {
+      id_user: userId,
+      email: 'user@example.com',
+      first_name: 'John',
+      last_name: 'Doe',
+      bio: 'Bio',
+      created_at: new Date('2024-01-01'),
+      birth_date: new Date('1990-01-01'),
+      updated_at: new Date('2024-01-02'),
+      role_name: ROLE.STUDENT,
+    };
 
-  it('Should return user by ID with heavy DTO if specified', async () => {});
+    const whereMock = vi.fn().mockResolvedValue([userMockData]);
+    const innerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        where: whereMock,
+      }),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+    };
 
-  it('Should throw User Repository Error if user not found', async () => {});
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
 
-  it('Should return user by Email with light DTO by default', async () => {});
+    const result = await repository.getUserById(userId);
 
-  it('Should return user by Email with heavy DTO if specified', async () => {});
+    expect(result.userId).toBe(userId);
+    expect(result.role).toBe(ROLE.STUDENT);
+    // Light DTO no debe tener email, firstName, etc.
+    expect('email' in result).toBe(false);
+  });
 
-  it('Should throw User Repository Error if user by Email not found', async () => {});
+  it('Should return user by ID with heavy DTO if specified', async () => {
+    const userId = '123';
+    const userMockData = {
+      id_user: userId,
+      email: 'user@example.com',
+      first_name: 'John',
+      last_name: 'Doe',
+      bio: 'Bio',
+      created_at: new Date('2024-01-01'),
+      birth_date: new Date('1990-01-01'),
+      updated_at: new Date('2024-01-02'),
+      role_name: ROLE.STUDENT,
+    };
 
-  it('Should return users by list of ids with light DTO by default', async () => {});
+    const whereMock = vi.fn().mockResolvedValue([userMockData]);
+    const innerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        where: whereMock,
+      }),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+    };
 
-  it('Should return users by list of ids with heavy DTO if specified', async () => {});
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
 
-  it('Should return empty list if no users found by list of ids', async () => {});
+    const result = await repository.getUserById(userId, false);
+    const heavyResult = result as UserHeavyOutDTO;
 
-  it('Should throw an error if the list of ids exceeds the maximum allowed', async () => {});
+    expect(heavyResult.userId).toBe(userId);
+    expect(heavyResult.role).toBe(ROLE.STUDENT);
+    expect(heavyResult.email).toBe('user@example.com');
+    expect(heavyResult.firstName).toBe('John');
+    expect(heavyResult.lastName).toBe('Doe');
+    expect(heavyResult.bio).toBe('Bio');
+    expect(heavyResult.createdAt).toEqual(new Date('2024-01-01'));
+    expect(heavyResult.birthDate).toEqual(new Date('1990-01-01'));
+  });
 
-  it('Should return a true if the user exists by the given id', async () => {});
+  it('Should throw User Repository Error if user not found', async () => {
+    const userId = 'non-existent-id';
 
-  it('Should return a false if the user does not exist by the given id', async () => {});
+    const whereMock = vi.fn().mockResolvedValue([]);
+    const innerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        where: whereMock,
+      }),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+    };
 
-  it('Should create a new User', async () => {});
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
 
-  it('Should throw User Repository Error if email already exists', async () => {});
+    await expect(repository.getUserById(userId)).rejects.toThrow();
+  });
 
-  it('Should update an existing User', async () => {});
+  it('Should return user by Email with light DTO by default', async () => {
+    const email = 'user@example.com';
+    const userMockData = {
+      id_user: '123',
+      email: email,
+      first_name: 'John',
+      last_name: 'Doe',
+      bio: 'Bio',
+      created_at: new Date('2024-01-01'),
+      birth_date: new Date('1990-01-01'),
+      updated_at: new Date('2024-01-02'),
+      role_name: ROLE.STUDENT,
+    };
 
-  it('Should throw User Repository Error if trying to update a non-existing User', async () => {});
+    const whereMock = vi.fn().mockResolvedValue([userMockData]);
+    const innerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        where: whereMock,
+      }),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+    };
 
-  it('Should throw User Repository Error if trying to update email to one that already exists', async () => {});
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
 
-  it('Should throw User Repository Error if no fields to update are provided', async () => {});
+    const result = await repository.getUserByEmail(email);
 
-  it('Should throw User Repository Error if trying to update with invalid fields', async () => {});
+    expect(result.userId).toBe('123');
+    expect(result.role).toBe(ROLE.STUDENT);
+    expect('email' in result).toBe(false);
+  });
 
-  it('Should delete an existing User', async () => {});
+  it('Should return user by Email with heavy DTO if specified', async () => {
+    const email = 'user@example.com';
+    const userMockData = {
+      id_user: '123',
+      email: email,
+      first_name: 'John',
+      last_name: 'Doe',
+      bio: 'Bio',
+      created_at: new Date('2024-01-01'),
+      birth_date: new Date('1990-01-01'),
+      updated_at: new Date('2024-01-02'),
+      role_name: ROLE.STUDENT,
+    };
 
-  it('Should throw User Repository Error if trying to delete a non-existing User', async () => {});
+    const whereMock = vi.fn().mockResolvedValue([userMockData]);
+    const innerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        where: whereMock,
+      }),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+    };
+
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    const result = await repository.getUserByEmail(email, false);
+    const heavyResult = result as UserHeavyOutDTO;
+
+    expect(heavyResult.userId).toBe('123');
+    expect(heavyResult.email).toBe(email);
+    expect(heavyResult.firstName).toBe('John');
+    expect(heavyResult.lastName).toBe('Doe');
+  });
+
+  it('Should throw User Repository Error if user by Email not found', async () => {
+    const email = 'nonexistent@example.com';
+
+    const whereMock = vi.fn().mockResolvedValue([]);
+    const innerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        where: whereMock,
+      }),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+    };
+
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    await expect(repository.getUserByEmail(email)).rejects.toThrow();
+  });
+
+  it('Should return users by list of ids with light DTO by default', async () => {
+    const ids = ['1', '2', '3'];
+    addMockData(3);
+
+    const countMockData = [{ count: 3 }];
+    const orderByMock = {
+      limit: vi.fn().mockReturnValue({
+        offset: vi.fn().mockResolvedValue(usersMockData),
+      }),
+    };
+    const whereMock = {
+      orderBy: vi.fn().mockReturnValue(orderByMock),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue(whereMock),
+        }),
+      }),
+    };
+    const countInnerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue(countMockData),
+        }),
+      }),
+    };
+
+    drizzleClient.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>)
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(countInnerJoinMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    const result = await repository.getUsersByIds(ids);
+
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveLength(3);
+    expect(result.data?.every((user) => 'email' in user === false)).toBe(true);
+  });
+
+  it('Should return users by list of ids with heavy DTO if specified', async () => {
+    const ids = ['1', '2'];
+    addMockData(2);
+
+    const countMockData = [{ count: 2 }];
+    const orderByMock = {
+      limit: vi.fn().mockReturnValue({
+        offset: vi.fn().mockResolvedValue(usersMockData),
+      }),
+    };
+    const whereMock = {
+      orderBy: vi.fn().mockReturnValue(orderByMock),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue(whereMock),
+        }),
+      }),
+    };
+    const countInnerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue(countMockData),
+        }),
+      }),
+    };
+
+    drizzleClient.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>)
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(countInnerJoinMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    const result = await repository.getUsersByIds(ids);
+
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveLength(2);
+    if (result.data) {
+      result.data.forEach((user) => {
+        const heavyUser = user as UserHeavyOutDTO;
+        expect(heavyUser.email).toBeDefined();
+        expect(heavyUser.firstName).toBeDefined();
+      });
+    }
+  });
+
+  it('Should return empty list if no users found by list of ids', async () => {
+    const ids = ['999', '888'];
+
+    const countMockData = [{ count: 0 }];
+    const orderByMock = {
+      limit: vi.fn().mockReturnValue({
+        offset: vi.fn().mockResolvedValue([]),
+      }),
+    };
+    const whereMock = {
+      orderBy: vi.fn().mockReturnValue(orderByMock),
+    };
+    const fromMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue(whereMock),
+        }),
+      }),
+    };
+    const countInnerJoinMock = {
+      innerJoin: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue(countMockData),
+        }),
+      }),
+    };
+
+    drizzleClient.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>)
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(countInnerJoinMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    const result = await repository.getUsersByIds(ids);
+
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveLength(0);
+  });
+
+  it('Should throw an error if the list of ids exceeds the maximum allowed', async () => {
+    const ids = Array.from({ length: 101 }, (_, i) => i.toString());
+
+    await expect(repository.getUsersByIds(ids)).rejects.toThrow();
+  });
+
+  it('Should return a true if the user exists by the given id', async () => {
+    const userId = '123';
+
+    const whereMock = vi.fn().mockResolvedValue([{ id_user: userId }]);
+    const fromMock = {
+      where: whereMock,
+    };
+
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    const result = await repository.userExists(userId);
+
+    expect(result).toBe(true);
+  });
+
+  it('Should return a false if the user does not exist by the given id', async () => {
+    const userId = 'non-existent';
+
+    const whereMock = vi.fn().mockResolvedValue([]);
+    const fromMock = {
+      where: whereMock,
+    };
+
+    drizzleClient.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue(fromMock),
+    } as unknown as ReturnType<typeof drizzleClient.select>);
+
+    const result = await repository.userExists(userId);
+
+    expect(result).toBe(false);
+  });
+
+  it('Should create a new User', async () => {
+    const newUser: UserInDTO = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      birthDate: new Date('1990-01-01'),
+    };
+
+    const createdUser = {
+      id_user: '123',
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john.doe@example.com',
+      birth_date: new Date('1990-01-01'),
+      bio: null,
+      profile_picture_url: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+      password_hash: 'hashedPassword',
+      role: ROLE.STUDENT,
+    };
+
+    const insertMock = {
+      values: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([createdUser]),
+      }),
+    };
+
+    drizzleClient.insert.mockReturnValue(
+      insertMock as unknown as ReturnType<typeof drizzleClient.insert>
+    );
+
+    const result = await repository.postUser(newUser);
+
+    expect(result.userId).toBe('123');
+    expect((result as UserHeavyOutDTO).firstName).toBe('John');
+  });
+
+  it('Should throw User Repository Error if email already exists', async () => {
+    const newUser: UserInDTO = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'existing@example.com',
+      birthDate: new Date('1992-05-15'),
+    };
+
+    const insertMock = {
+      values: vi.fn().mockReturnValue({
+        returning: vi
+          .fn()
+          .mockRejectedValue(new Error('duplicate key value violates unique constraint')),
+      }),
+    };
+
+    drizzleClient.insert.mockReturnValue(
+      insertMock as unknown as ReturnType<typeof drizzleClient.insert>
+    );
+
+    await expect(repository.postUser(newUser)).rejects.toThrow();
+  });
+
+  it('Should update an existing User', async () => {
+    const userId = '123';
+    const updates: Partial<UserUpdateDTO> = {
+      firstName: 'Updated',
+      bio: 'New bio',
+    };
+
+    const updatedUser = {
+      id_user: userId,
+      first_name: 'Updated',
+      last_name: 'Doe',
+      email: 'john.doe@example.com',
+      birth_date: new Date('1990-01-01'),
+      bio: 'New bio',
+      profile_picture_url: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+      password_hash: 'hashedPassword',
+      role: ROLE.STUDENT,
+    };
+
+    const updateMock = {
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([updatedUser]),
+        }),
+      }),
+    };
+
+    drizzleClient.update.mockReturnValue(
+      updateMock as unknown as ReturnType<typeof drizzleClient.update>
+    );
+
+    const result = await repository.updateUser(userId, updates);
+
+    expect(result.userId).toBe(userId);
+    expect((result as UserHeavyOutDTO).firstName).toBe('Updated');
+    expect((result as UserHeavyOutDTO).bio).toBe('New bio');
+  });
+
+  it('Should throw User Repository Error if trying to update a non-existing User', async () => {
+    const userId = 'non-existent';
+    const updates: Partial<UserUpdateDTO> = {
+      firstName: 'Updated',
+    };
+
+    const updateMock = {
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    };
+
+    drizzleClient.update.mockReturnValue(
+      updateMock as unknown as ReturnType<typeof drizzleClient.update>
+    );
+
+    await expect(repository.updateUser(userId, updates)).rejects.toThrow();
+  });
+
+  it('Should throw User Repository Error if trying to update email to one that already exists', async () => {
+    const userId = '123';
+    const updates: Partial<UserUpdateDTO> = {
+      email: 'existing@example.com',
+    };
+
+    const updateMock = {
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          returning: vi
+            .fn()
+            .mockRejectedValue(new Error('duplicate key value violates unique constraint')),
+        }),
+      }),
+    };
+
+    drizzleClient.update.mockReturnValue(
+      updateMock as unknown as ReturnType<typeof drizzleClient.update>
+    );
+
+    await expect(repository.updateUser(userId, updates)).rejects.toThrow();
+  });
+
+  it('Should throw User Repository Error if no fields to update are provided', async () => {
+    const userId = '123';
+    const updates: Partial<UserUpdateDTO> = {};
+
+    await expect(repository.updateUser(userId, updates)).rejects.toThrow();
+  });
+
+  it('Should throw User Repository Error if trying to update with invalid fields', async () => {
+    const userId = '123';
+    const updates = { invalidField: 'value' } as unknown as Partial<UserUpdateDTO>;
+
+    await expect(repository.updateUser(userId, updates)).rejects.toThrow();
+  });
+
+  it('Should delete an existing User', async () => {
+    const userId = '123';
+
+    const deleteMock = {
+      where: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ id_user: userId }]),
+      }),
+    };
+
+    drizzleClient.delete.mockReturnValue(
+      deleteMock as unknown as ReturnType<typeof drizzleClient.delete>
+    );
+
+    await expect(repository.deleteUser(userId)).resolves.not.toThrow();
+  });
+
+  it('Should throw User Repository Error if trying to delete a non-existing User', async () => {
+    const userId = 'non-existent';
+
+    const deleteMock = {
+      where: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([]),
+      }),
+    };
+
+    drizzleClient.delete.mockReturnValue(
+      deleteMock as unknown as ReturnType<typeof drizzleClient.delete>
+    );
+
+    await expect(repository.deleteUser(userId)).rejects.toThrow();
+  });
 });
