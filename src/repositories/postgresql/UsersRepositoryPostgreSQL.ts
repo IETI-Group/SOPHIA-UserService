@@ -16,6 +16,13 @@ import type { UsersRepository } from '../UsersRepository.js';
 
 export class UsersRepositoryPostgreSQL implements UsersRepository {
   private readonly client: DBDrizzleProvider;
+  private readonly validSortFields: Record<keyof ValidUserSortFields, AnyColumn> = {
+    first_name: users.first_name,
+    last_name: users.last_name,
+    email: users.email,
+    birth_date: users.birth_date,
+    created_at: users.created_at,
+  };
   constructor(drizzleClient: DBDrizzleProvider) {
     this.client = drizzleClient;
   }
@@ -92,14 +99,8 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
     const whereConditions: SQL<unknown>[] = this.validateFilters(filters);
     const isDescending = order?.toLowerCase() === 'desc';
     const sortField = sort || 'first_name';
-    const validSortFields: Record<keyof ValidUserSortFields, AnyColumn> = {
-      first_name: users.first_name,
-      last_name: users.last_name,
-      email: users.email,
-      birth_date: users.birth_date,
-      created_at: users.created_at,
-    };
-    const sortColumn = validSortFields[sortField as keyof ValidUserSortFields] || users.first_name;
+    const sortColumn =
+      this.validSortFields[sortField as keyof ValidUserSortFields] || users.first_name;
     const orderByClause = isDescending ? desc(sortColumn) : asc(sortColumn);
 
     const baseQuery = this.getUsersBaseQuery();
@@ -133,17 +134,25 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
     };
   }
 
-  public async getUsersByIds(ids: string[], lightDTO = true): Promise<PaginatedUsers> {
+  public async getUsersByIds(
+    ids: string[],
+    lightDTO = true,
+    sort: string = 'first_name',
+    order: 'asc' | 'desc' = 'asc'
+  ): Promise<PaginatedUsers> {
     const MAX_IDS = 100;
 
     if (ids.length > MAX_IDS) {
       throw new Error(`Cannot query more than ${MAX_IDS} users at once. Received: ${ids.length}`);
     }
 
+    const isDescending = order?.toLowerCase() === 'desc';
+    const sortColumn = this.validSortFields[sort as keyof ValidUserSortFields] || users.first_name;
+    const orderByClause = isDescending ? desc(sortColumn) : asc(sortColumn);
     const baseQuery = this.getUsersBaseQuery();
     const usersResult = await baseQuery
       .where(inArray(users.id_user, ids))
-      .orderBy(asc(users.first_name))
+      .orderBy(orderByClause)
       .limit(ids.length)
       .offset(0);
 
@@ -243,7 +252,6 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
     }
   }
   public async updateUser(userId: string, userInDTO: Partial<UserUpdateDTO>): Promise<UserOutDTO> {
-    // Validar que se proporcionen campos para actualizar
     if (!userInDTO || Object.keys(userInDTO).length === 0) {
       throw new Error('No fields to update provided');
     }

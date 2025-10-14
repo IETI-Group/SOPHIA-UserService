@@ -680,7 +680,7 @@ describe('Users Repository', async () => {
   it('Should throw an error if the list of ids exceeds the maximum allowed', async () => {
     const ids = Array.from({ length: 101 }, (_, i) => i.toString());
 
-    await expect(repository.getUsersByIds(ids)).rejects.toThrow();
+    await expect(repository.getUsersByIds(ids, undefined, undefined, 'asc')).rejects.toThrow();
   });
 
   it('Should return a true if the user exists by the given id', async () => {

@@ -15,7 +15,13 @@ export interface UsersRepository {
     order: string,
     ligthDTO: boolean
   ): Promise<PaginatedUsers>;
-  getUsersByIds(ids: string[], lightDTO?: boolean): Promise<PaginatedUsers>;
+
+  getUsersByIds(
+    ids: string[],
+    lightDTO?: boolean,
+    sort?: string,
+    order?: 'asc' | 'desc'
+  ): Promise<PaginatedUsers>;
   getUserById(userId: string, lightDTO?: boolean): Promise<UserOutDTO>;
   getUserByEmail(email: string, lightDTO?: boolean): Promise<UserOutDTO>;
   userExists(userId: string): Promise<boolean>;
