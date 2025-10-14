@@ -42,39 +42,43 @@ const userController = container.resolve<UserController>('userController');
  * @desc    Get all users with pagination
  * @access  Public
  */
-router.get('/', [...usersParams, ...paginationParams], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty())
-    throw new Error(
-      `Validation error: ${errors
-        .array()
-        .map((err) => err.msg)
-        .join(', ')}`
+router.get(
+  '/',
+  [...usersParams, ...paginationParams, booleanQuery('light_dto', 'Invalid light DTO value', true)],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      throw new Error(
+        `Validation error: ${errors
+          .array()
+          .map((err) => err.msg)
+          .join(', ')}`
+      );
+    const {
+      page,
+      size,
+      sort,
+      order,
+      lightDTO,
+      firstName,
+      lastName,
+      birthDayFrom,
+      birthDayTo,
+    }: UsersQuery = parseUsersQuery(req);
+    const users = await userController.getUsers(
+      page,
+      size,
+      sort,
+      order,
+      lightDTO,
+      firstName,
+      lastName,
+      birthDayFrom,
+      birthDayTo
     );
-  const {
-    page,
-    size,
-    sort,
-    order,
-    lightDTO,
-    firstName,
-    lastName,
-    birthDayFrom,
-    birthDayTo,
-  }: UsersQuery = parseUsersQuery(req);
-  const users = await userController.getUsers(
-    page,
-    size,
-    sort,
-    order,
-    lightDTO,
-    firstName,
-    lastName,
-    birthDayFrom,
-    birthDayTo
-  );
-  res.json(users);
-});
+    res.json(users);
+  }
+);
 
 /**
  * @route   GET /api/v1/users/id/:id
@@ -187,7 +191,7 @@ router.delete(
 
     const userId = req.params.id;
     const response = await userController.deleteUser(userId);
-    res.status(204).json(response);
+    res.status(200).json(response);
   }
 );
 

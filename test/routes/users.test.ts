@@ -297,7 +297,7 @@ describe('Users Routes Validation Tests', () => {
 
       const response = await request(app).delete('/api/v1/users/validUserId123');
 
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(200);
     });
   });
 

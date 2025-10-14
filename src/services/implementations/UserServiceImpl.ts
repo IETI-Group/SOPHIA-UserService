@@ -34,7 +34,7 @@ export default class UserServiceImpl implements UserService {
     lightDTO: boolean | undefined,
     filters: FiltersUser
   ): Promise<PaginatedUsers> {
-    return this.userRepository.getUsers(page, size, filters, sort, order, lightDTO ?? false);
+    return this.userRepository.getUsers(page, size, filters, sort, order, lightDTO ?? true);
   }
   async getUserById(userId: string, lightDTO: boolean): Promise<UserOutDTO> {
     return this.userRepository.getUserById(userId, lightDTO);
@@ -48,14 +48,14 @@ export default class UserServiceImpl implements UserService {
     const users = await this.userRepository.getUsersByIds(userIds, lightDTO, sort, order);
     return users;
   }
-  async postUser(_userDTO: UserInDTO): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  async postUser(userDTO: UserInDTO): Promise<UserOutDTO> {
+    return this.userRepository.postUser(userDTO);
   }
-  async updateUser(_userId: string, _userInDTO: Partial<UserUpdateDTO>): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  async updateUser(userId: string, userInDTO: Partial<UserUpdateDTO>): Promise<UserOutDTO> {
+    return this.userRepository.updateUser(userId, userInDTO);
   }
-  async deleteUser(_userId: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async deleteUser(userId: string): Promise<void> {
+    return this.userRepository.deleteUser(userId);
   }
   async getUserLearningPath(_userId: string): Promise<LearningPathOutDTO> {
     throw new Error('Method not implemented.');
@@ -80,7 +80,7 @@ export default class UserServiceImpl implements UserService {
     _order: 'asc' | 'desc',
     _showInstructors?: boolean,
     _showCourses?: boolean,
-    _reviewedId?: string
+    _eviewedId?: string
   ): Promise<PaginatedReviews> {
     throw new Error('Method not implemented.');
   }
