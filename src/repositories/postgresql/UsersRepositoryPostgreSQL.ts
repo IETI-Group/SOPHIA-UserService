@@ -1,7 +1,7 @@
 import type { AnyColumn } from 'drizzle-orm';
 import { and, asc, desc, eq, gte, ilike, inArray, lte, type SQL, sql } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
-import { roles, users, users_roles } from '../../db/schema.js';
+import { ROLE, roles, users, users_roles, type ValidUserSortFields } from '../../db/schema.js';
 import type {
   FiltersUser,
   PaginatedUsers,
@@ -10,8 +10,6 @@ import type {
   UserOutDTO,
   UserUpdateDTO,
 } from '../../models/index.js';
-import type { ValidUserSortFields } from '../../utils/types.js';
-import { ROLE } from '../../utils/types.js';
 import type { UsersRepository } from '../UsersRepository.js';
 
 export class UsersRepositoryPostgreSQL implements UsersRepository {

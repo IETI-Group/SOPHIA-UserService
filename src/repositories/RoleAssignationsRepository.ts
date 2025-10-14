@@ -1,5 +1,5 @@
 /** TODO
-import type { ROLE } from "../utils/types.js"
+import type { ROLE } from "../db/schema.js"
 
 export interface RoleAssignationsRepository {
     getAssignedRoles(page: number, size: number, roleFilter: FiltersRoleAssignation, sort?: string, order?: string): PaginatedAssignations

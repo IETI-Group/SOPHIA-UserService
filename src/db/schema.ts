@@ -13,17 +13,65 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import {
-  LEARNING_STYLES,
-  PACE_PREFERENCE,
-  ROLE,
-  ROLE_STATUS,
-  VERIFICATION_STATUS,
-} from '../utils/types.js';
 
-/*
- * ENUMS
- */
+// ============================================
+// TYPE DEFINITIONS & ENUMS
+// ============================================
+
+export enum ROLE {
+  ADMIN = 'admin',
+  INSTRUCTOR = 'instructor',
+  STUDENT = 'student',
+  GUEST = 'guest',
+}
+
+export enum LEARNING_STYLES {
+  VISUAL = 'visual',
+  AUDITORY = 'auditory',
+  KINESTHETIC = 'kinesthetic',
+  READING_WRITING = 'reading_writing',
+  GAMIFICATION = 'gamification',
+  STORYTELLING = 'storytelling',
+  CASE_STUDY = 'case_study',
+  PROBLEM_SOLVING = 'problem_solving',
+  COLLABORATIVE = 'collaborative',
+  SELF_PACED = 'self_paced',
+}
+
+export enum PACE_PREFERENCE {
+  SLOW = 'slow',
+  NORMAL = 'normal',
+  FAST = 'fast',
+}
+
+export enum ROLE_STATUS {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+}
+
+export enum VERIFICATION_STATUS {
+  VERIFIED = 'verified',
+  PENDING = 'pending',
+  REJECTED = 'rejected',
+}
+
+export enum REVIEW_DISCRIMINANT {
+  INSTRUCTOR = 'instructor',
+  COURSE = 'course',
+}
+
+export interface ValidUserSortFields {
+  first_name: string;
+  last_name: string;
+  email: string;
+  birth_date: string;
+  created_at: string;
+}
+
+// ============================================
+// POSTGRES ENUMS
+// ============================================
 export const userRoleEnum = pgEnum('user_role', [ROLE.ADMIN, ROLE.STUDENT, ROLE.INSTRUCTOR]);
 export const learningStyleEnum = pgEnum('learning_style', [
   LEARNING_STYLES.VISUAL,

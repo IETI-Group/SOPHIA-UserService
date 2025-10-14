@@ -1,4 +1,4 @@
-import type { LEARNING_STYLES, PACE_PREFERENCE } from '../../../utils/types.js';
+import type { LEARNING_STYLES, PACE_PREFERENCE } from '../../../db/schema.js';
 
 interface LearningPathInDTO {
   primaryStyle: LEARNING_STYLES;

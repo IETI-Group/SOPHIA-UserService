@@ -1,4 +1,4 @@
-import type { REVIEW_DISCRIMINANT } from '../../../utils/types.js';
+import type { REVIEW_DISCRIMINANT } from '../../../db/schema.js';
 
 interface ReviewInDTO {
   reviewerId: string;

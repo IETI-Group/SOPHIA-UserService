@@ -1,4 +1,4 @@
-import type { ROLE } from '../../../utils/types.js';
+import type { ROLE } from '../../../db/schema.js';
 
 interface UserOutDTO {
   userId: string;
