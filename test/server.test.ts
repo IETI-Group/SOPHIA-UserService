@@ -1,6 +1,8 @@
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import app from '../src/app.js';
+
+vi.mock('../../src/config/diContainer.js', () => ({}));
 
 describe('SOPHIA User Service API', () => {
   const prefix = app.get('apiPrefix');

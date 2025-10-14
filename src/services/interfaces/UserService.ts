@@ -27,8 +27,6 @@ export default interface UserService {
   getUserByEmail(email: string, lightDTO?: boolean): Promise<UserOutDTO>;
   getUsersByIds(
     userIds: string[],
-    page: number,
-    size: number,
     sort: string | undefined,
     order: 'asc' | 'desc',
     lightDTO?: boolean

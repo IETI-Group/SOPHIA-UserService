@@ -180,12 +180,10 @@ export default class UserController {
 
   public async getUsersByIds(
     userIds: string[],
-    page: number,
-    size: number,
     sort: string | undefined,
     order: 'asc' | 'desc',
     lightDTO?: boolean
   ): Promise<PaginatedUsers> {
-    return this.userService.getUsersByIds(userIds, page, size, sort, order, lightDTO);
+    return this.userService.getUsersByIds(userIds, sort, order, lightDTO);
   }
 }

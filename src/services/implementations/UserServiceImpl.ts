@@ -13,34 +13,40 @@ import type {
   UserOutDTO,
   UserUpdateDTO,
 } from '../../models/index.js';
+import type { UsersRepository } from '../../repositories/index.js';
 import type UserService from '../interfaces/UserService.js';
 
 export default class UserServiceImpl implements UserService {
-  getUserByEmail(_email: string, _lightDTO: boolean): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  private readonly userRepository: UsersRepository;
+
+  constructor(userRepository: UsersRepository) {
+    this.userRepository = userRepository;
+  }
+
+  getUserByEmail(email: string, lightDTO: boolean): Promise<UserOutDTO> {
+    return this.userRepository.getUserByEmail(email, lightDTO);
   }
   async getUsers(
-    _page: number,
-    _size: number,
-    _sort: string,
-    _order: 'asc' | 'desc',
-    _lightDTO: boolean | undefined,
-    _filters: FiltersUser
+    page: number,
+    size: number,
+    sort: string,
+    order: 'asc' | 'desc',
+    lightDTO: boolean | undefined,
+    filters: FiltersUser
   ): Promise<PaginatedUsers> {
-    throw new Error('Method not implemented.');
+    return this.userRepository.getUsers(page, size, filters, sort, order, lightDTO ?? false);
   }
-  async getUserById(_userId: string, _lightDTO: boolean): Promise<UserOutDTO> {
-    throw new Error('Method not implemented.');
+  async getUserById(userId: string, lightDTO: boolean): Promise<UserOutDTO> {
+    return this.userRepository.getUserById(userId, lightDTO);
   }
   async getUsersByIds(
-    _userIds: string[],
-    _page: number,
-    _size: number,
-    _sort: string | undefined,
-    _order: 'asc' | 'desc',
-    _lightDTO?: boolean
+    userIds: string[],
+    sort: string | undefined,
+    order: 'asc' | 'desc',
+    lightDTO?: boolean
   ): Promise<PaginatedUsers> {
-    throw new Error('Method not implemented.');
+    const users = await this.userRepository.getUsersByIds(userIds, lightDTO, sort, order);
+    return users;
   }
   async postUser(_userDTO: UserInDTO): Promise<UserOutDTO> {
     throw new Error('Method not implemented.');

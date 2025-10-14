@@ -131,8 +131,8 @@ router.post(
     if (!validationResult(req).isEmpty()) {
       throw new Error('Validation error: Invalid users array');
     }
-    const { users, page, size, sort, order, lightDTO } = parseBatchUsersQuery(req);
-    const userList = await userController.getUsersByIds(users, page, size, sort, order, lightDTO);
+    const { users, sort, order, lightDTO } = parseBatchUsersQuery(req);
+    const userList = await userController.getUsersByIds(users, sort, order, lightDTO);
     res.json(userList);
   }
 );

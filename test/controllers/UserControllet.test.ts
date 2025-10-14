@@ -750,8 +750,6 @@ describe('User Controller tests', () => {
 
       const result = await userController.getUsersByIds(
         userIds,
-        params.page,
-        params.size,
         params.sort,
         params.order,
         params.lightDTO
@@ -767,8 +765,6 @@ describe('User Controller tests', () => {
       expect(userService.getUsersByIds).toHaveBeenCalledTimes(1);
       expect(userService.getUsersByIds).toHaveBeenCalledWith(
         userIds,
-        params.page,
-        params.size,
         params.sort,
         params.order,
         params.lightDTO
