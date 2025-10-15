@@ -2,6 +2,7 @@ import { asClass, asValue, createContainer, InjectionMode, Lifetime } from 'awil
 import UserController from '../controllers/UserController.js';
 import {
   LearningPathsRepositoryPostgreSQL,
+  LinkedAccountsRepositoryPostgreSQL,
   ReviewsRepositoryPostgreSQL,
   UsersRepositoryPostgreSQL,
 } from '../repositories/index.js';
@@ -16,6 +17,10 @@ const container = createContainer({
 container.register({
   logger: asValue(logger),
   drizzleClient: asValue(db),
+
+  linkedAccountsRepository: asClass(LinkedAccountsRepositoryPostgreSQL, {
+    lifetime: Lifetime.SINGLETON,
+  }),
 
   learningPathsRepository: asClass(LearningPathsRepositoryPostgreSQL, {
     lifetime: Lifetime.SINGLETON,
