@@ -702,4 +702,106 @@ describe('User Service Implementation', () => {
       );
     });
   });
+
+  describe('getInstructorReviews', () => {
+    it('should call reviewsRepository.getInstructorReviews with correct parameters', async () => {
+      const instructorId = 'instructor-123';
+      const page = 1;
+      const size = 10;
+      const sort = 'created_at';
+      const order = 'desc' as 'asc' | 'desc';
+
+      const mockResponse = {
+        success: true,
+        data: [
+          {
+            id: 'review-1',
+            reviewerId: 'user-1',
+            reviewedId: instructorId,
+            discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+            rate: 5,
+            recommended: true,
+            comments: 'Great instructor!',
+            createdAt: new Date('2024-01-01'),
+            updatedAt: new Date('2024-01-01'),
+          },
+        ],
+        message: 'Instructor reviews retrieved successfully',
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      reviewsRepository.getInstructorReviews.mockResolvedValue(mockResponse);
+
+      const result = await userService.getInstructorReviews(instructorId, page, size, sort, order);
+
+      expect(result).toEqual(mockResponse);
+      expect(reviewsRepository.getInstructorReviews).toHaveBeenCalledTimes(1);
+      expect(reviewsRepository.getInstructorReviews).toHaveBeenCalledWith(
+        instructorId,
+        page,
+        size,
+        sort,
+        order
+      );
+    });
+  });
+
+  describe('getCourseReviews', () => {
+    it('should call reviewsRepository.getCourseReviews with correct parameters', async () => {
+      const courseId = 'course-456';
+      const page = 1;
+      const size = 10;
+      const sort = 'rate';
+      const order = 'asc' as 'asc' | 'desc';
+
+      const mockResponse = {
+        success: true,
+        data: [
+          {
+            id: 'review-2',
+            reviewerId: 'user-2',
+            reviewedId: courseId,
+            discriminant: REVIEW_DISCRIMINANT.COURSE,
+            rate: 4,
+            recommended: true,
+            comments: 'Good course!',
+            createdAt: new Date('2024-01-02'),
+            updatedAt: new Date('2024-01-02'),
+          },
+        ],
+        message: 'Course reviews retrieved successfully',
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      reviewsRepository.getCourseReviews.mockResolvedValue(mockResponse);
+
+      const result = await userService.getCourseReviews(courseId, page, size, sort, order);
+
+      expect(result).toEqual(mockResponse);
+      expect(reviewsRepository.getCourseReviews).toHaveBeenCalledTimes(1);
+      expect(reviewsRepository.getCourseReviews).toHaveBeenCalledWith(
+        courseId,
+        page,
+        size,
+        sort,
+        order
+      );
+    });
+  });
 });

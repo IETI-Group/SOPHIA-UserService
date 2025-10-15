@@ -279,6 +279,52 @@ router.get(
   }
 );
 
+/**
+ * @route   GET /api/v1/users/instructors/:instructorId/reviews
+ * @desc    Get all reviews for a specific instructor
+ * @access  Public
+ */
+router.get(
+  '/instructors/:instructorId/reviews',
+  [stringParam('instructorId', 'Invalid instructor ID'), ...paginationParams],
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      throw new Error('Validation error: Invalid instructor ID');
+    }
+
+    const instructorId = req.params.instructorId;
+    const { page, size, sort, order } = parsePaginationQuery(req);
+    const reviews = await userController.getInstructorReviews(
+      instructorId,
+      page,
+      size,
+      sort,
+      order
+    );
+    res.json(reviews);
+  }
+);
+
+/**
+ * @route   GET /api/v1/users/courses/:courseId/reviews
+ * @desc    Get all reviews for a specific course
+ * @access  Public
+ */
+router.get(
+  '/courses/:courseId/reviews',
+  [stringParam('courseId', 'Invalid course ID'), ...paginationParams],
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      throw new Error('Validation error: Invalid course ID');
+    }
+
+    const courseId = req.params.courseId;
+    const { page, size, sort, order } = parsePaginationQuery(req);
+    const reviews = await userController.getCourseReviews(courseId, page, size, sort, order);
+    res.json(reviews);
+  }
+);
+
 router.post(
   '/:id/reviews',
   [stringParam('id', 'Invalid user ID'), ...reviewBodyInDTO()],

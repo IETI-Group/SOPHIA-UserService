@@ -105,6 +105,24 @@ export default class UserServiceImpl implements UserService {
       reviewedId
     );
   }
+  async getInstructorReviews(
+    instructorId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
+  ): Promise<PaginatedReviews> {
+    return this.reviewsRepository.getInstructorReviews(instructorId, page, size, sort, order);
+  }
+  async getCourseReviews(
+    courseId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
+  ): Promise<PaginatedReviews> {
+    return this.reviewsRepository.getCourseReviews(courseId, page, size, sort, order);
+  }
   async postReview(reviewIn: ReviewInDTO): Promise<ReviewOutDTO> {
     return this.reviewsRepository.postReview(reviewIn);
   }

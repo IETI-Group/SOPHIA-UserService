@@ -202,6 +202,88 @@ export class ReviewsRepositoryPostgreSQL implements ReviewsRepository {
     };
   }
 
+  public async getInstructorReviews(
+    instructorId: string,
+    page: number,
+    size: number,
+    sort?: string,
+    order?: string
+  ): Promise<PaginatedReviews> {
+    const conditions = [eq(instructors_reviews.instructor_id, instructorId)];
+
+    const total = await this.countReviewsWithConditions(conditions);
+
+    const sortField = sort === 'created_at' ? reviews.created_at : reviews.created_at;
+    const orderFn = order === 'asc' ? asc : desc;
+    const offset = (page - 1) * size;
+
+    const reviewsData = await this.buildReviewQueryWithJoins()
+      .where(and(...conditions))
+      .orderBy(orderFn(sortField))
+      .limit(size)
+      .offset(offset);
+
+    const reviewsDTOs = reviewsData.map((review) => this.parseReviewToDTO(review));
+
+    const totalPages = Math.ceil(total / size);
+
+    return {
+      success: true,
+      data: reviewsDTOs,
+      message: 'Instructor reviews retrieved successfully',
+      timestamp: new Date().toISOString(),
+      pagination: {
+        page,
+        limit: size,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
+  public async getCourseReviews(
+    courseId: string,
+    page: number,
+    size: number,
+    sort?: string,
+    order?: string
+  ): Promise<PaginatedReviews> {
+    const conditions = [eq(courses_reviews.course_id, courseId)];
+
+    const total = await this.countReviewsWithConditions(conditions);
+
+    const sortField = sort === 'created_at' ? reviews.created_at : reviews.created_at;
+    const orderFn = order === 'asc' ? asc : desc;
+    const offset = (page - 1) * size;
+
+    const reviewsData = await this.buildReviewQueryWithJoins()
+      .where(and(...conditions))
+      .orderBy(orderFn(sortField))
+      .limit(size)
+      .offset(offset);
+
+    const reviewsDTOs = reviewsData.map((review) => this.parseReviewToDTO(review));
+
+    const totalPages = Math.ceil(total / size);
+
+    return {
+      success: true,
+      data: reviewsDTOs,
+      message: 'Course reviews retrieved successfully',
+      timestamp: new Date().toISOString(),
+      pagination: {
+        page,
+        limit: size,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   public async postReview(reviewIn: ReviewInDTO): Promise<ReviewOutDTO> {
     // Validate that instructor exists if discriminant is INSTRUCTOR
     if (reviewIn.discriminant === REVIEW_DISCRIMINANT.INSTRUCTOR) {

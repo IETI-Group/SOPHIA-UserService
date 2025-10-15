@@ -580,6 +580,82 @@ describe('Users Routes Validation Tests', () => {
     });
   });
 
+  describe('GET /api/v1/users/instructors/:instructorId/reviews', () => {
+    it('should accept valid instructor ID and pagination parameters', async () => {
+      userController.getInstructorReviews.mockResolvedValue({
+        success: true,
+        message: 'Instructor reviews retrieved successfully',
+        data: [],
+        timestamp: new Date().toISOString(),
+        pagination: { page: 1, limit: 10, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
+      });
+
+      const response = await request(app)
+        .get('/api/v1/users/instructors/instructor-123/reviews')
+        .query({
+          page: '1',
+          size: '10',
+          sort: 'createdAt',
+          order: 'desc',
+        });
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should reject invalid instructor ID', async () => {
+      const response = await request(app).get('/api/v1/users/instructors//reviews');
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should reject invalid pagination parameters', async () => {
+      const response = await request(app)
+        .get('/api/v1/users/instructors/instructor-123/reviews')
+        .query({
+          page: 'invalid',
+          size: 10,
+        });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('GET /api/v1/users/courses/:courseId/reviews', () => {
+    it('should accept valid course ID and pagination parameters', async () => {
+      userController.getCourseReviews.mockResolvedValue({
+        success: true,
+        message: 'Course reviews retrieved successfully',
+        data: [],
+        timestamp: new Date().toISOString(),
+        pagination: { page: 1, limit: 10, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
+      });
+
+      const response = await request(app).get('/api/v1/users/courses/course-456/reviews').query({
+        page: '1',
+        size: '10',
+        sort: 'createdAt',
+        order: 'asc',
+      });
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should reject invalid course ID', async () => {
+      const response = await request(app).get('/api/v1/users/courses//reviews');
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should reject invalid pagination parameters', async () => {
+      const response = await request(app).get('/api/v1/users/courses/course-456/reviews').query({
+        page: 1,
+        size: 'invalid',
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
   describe('SQL Injection Prevention', () => {
     it('should sanitize malicious firstName input', async () => {
       userController.getUsers.mockResolvedValue({

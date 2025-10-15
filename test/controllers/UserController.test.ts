@@ -771,4 +771,136 @@ describe('User Controller tests', () => {
       );
     });
   });
+
+  describe('getInstructorReviews', () => {
+    it('should call the service to get instructor reviews and return them', async () => {
+      const instructorId = 'instructor-123';
+      const params = {
+        page: 1,
+        size: 10,
+        sort: 'created_at',
+        order: 'desc' as 'asc' | 'desc',
+      };
+      const timestamp = new Date().toISOString();
+
+      const mockReviews: ReviewOutDTO[] = Array.from({ length: 3 }, (_, i) => {
+        return {
+          id: `review-${i}`,
+          rate: 5,
+          recommended: true,
+          comments: 'Great instructor!',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          reviewedId: instructorId,
+          discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+          reviewerId: `reviewer-${i}`,
+        };
+      });
+
+      userService.getInstructorReviews.mockResolvedValue({
+        success: true,
+        message: 'Instructor reviews retrieved successfully',
+        data: mockReviews,
+        timestamp,
+        pagination: {
+          page: params.page,
+          limit: params.size,
+          total: 3,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      });
+
+      const result = await userController.getInstructorReviews(
+        instructorId,
+        params.page,
+        params.size,
+        params.sort,
+        params.order
+      );
+
+      expect(result).toBeDefined();
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Instructor reviews retrieved successfully');
+      expect(result.data).toBeInstanceOf(Array);
+      expect(result.data).toHaveLength(3);
+      expect(result.timestamp).toBe(timestamp);
+
+      expect(userService.getInstructorReviews).toHaveBeenCalledTimes(1);
+      expect(userService.getInstructorReviews).toHaveBeenCalledWith(
+        instructorId,
+        params.page,
+        params.size,
+        params.sort,
+        params.order
+      );
+    });
+  });
+
+  describe('getCourseReviews', () => {
+    it('should call the service to get course reviews and return them', async () => {
+      const courseId = 'course-456';
+      const params = {
+        page: 1,
+        size: 10,
+        sort: 'rate',
+        order: 'asc' as 'asc' | 'desc',
+      };
+      const timestamp = new Date().toISOString();
+
+      const mockReviews: ReviewOutDTO[] = Array.from({ length: 2 }, (_, i) => {
+        return {
+          id: `review-${i}`,
+          rate: 4 + i,
+          recommended: true,
+          comments: 'Good course!',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          reviewedId: courseId,
+          discriminant: REVIEW_DISCRIMINANT.COURSE,
+          reviewerId: `reviewer-${i}`,
+        };
+      });
+
+      userService.getCourseReviews.mockResolvedValue({
+        success: true,
+        message: 'Course reviews retrieved successfully',
+        data: mockReviews,
+        timestamp,
+        pagination: {
+          page: params.page,
+          limit: params.size,
+          total: 2,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      });
+
+      const result = await userController.getCourseReviews(
+        courseId,
+        params.page,
+        params.size,
+        params.sort,
+        params.order
+      );
+
+      expect(result).toBeDefined();
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Course reviews retrieved successfully');
+      expect(result.data).toBeInstanceOf(Array);
+      expect(result.data).toHaveLength(2);
+      expect(result.timestamp).toBe(timestamp);
+
+      expect(userService.getCourseReviews).toHaveBeenCalledTimes(1);
+      expect(userService.getCourseReviews).toHaveBeenCalledWith(
+        courseId,
+        params.page,
+        params.size,
+        params.sort,
+        params.order
+      );
+    });
+  });
 });
