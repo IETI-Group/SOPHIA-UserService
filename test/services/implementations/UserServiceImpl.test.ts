@@ -8,7 +8,7 @@ import type {
   UserInDTO,
   UserUpdateDTO,
 } from '../../../src/models/index.js';
-import type { UsersRepository } from '../../../src/repositories/index.js';
+import type { LearningPathsRepository, UsersRepository } from '../../../src/repositories/index.js';
 import UserServiceImpl from '../../../src/services/implementations/UserServiceImpl.js';
 import {
   LEARNING_STYLES,
@@ -19,10 +19,12 @@ import {
 
 describe('User Service Implementation', () => {
   const userRepository = mockDeep<UsersRepository>();
-  const userService = new UserServiceImpl(userRepository);
+  const learningPathsRepository = mockDeep<LearningPathsRepository>();
+  const userService = new UserServiceImpl(userRepository, learningPathsRepository);
 
   beforeEach(() => {
     mockReset(userRepository);
+    mockReset(learningPathsRepository);
   });
 
   describe('getUsers', () => {
@@ -277,17 +279,32 @@ describe('User Service Implementation', () => {
   });
 
   describe('getUserLearningPath', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call repository getUserLearningPath with correct parameters', async () => {
       const userId = '12345';
+      const mockLearningPath = {
+        id: 'lp-123',
+        userId: userId,
+        primaryStyle: LEARNING_STYLES.VISUAL,
+        secondaryStyle: LEARNING_STYLES.AUDITORY,
+        pacePreference: PACE_PREFERENCE.NORMAL,
+        interactivityPreference: 5,
+        gamificationEnabled: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-02'),
+      };
 
-      await expect(userService.getUserLearningPath(userId)).rejects.toThrow(
-        'Method not implemented.'
-      );
+      learningPathsRepository.getUserLearningPath.mockResolvedValue(mockLearningPath);
+
+      const result = await userService.getUserLearningPath(userId);
+
+      expect(result).toEqual(mockLearningPath);
+      expect(learningPathsRepository.getUserLearningPath).toHaveBeenCalledTimes(1);
+      expect(learningPathsRepository.getUserLearningPath).toHaveBeenCalledWith(userId);
     });
   });
 
   describe('postUserLearningPath', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call repository postUserLearningPath with correct parameters', async () => {
       const userId = '12345';
       const learningPathInDTO: LearningPathInDTO = {
         primaryStyle: LEARNING_STYLES.VISUAL,
@@ -297,21 +314,60 @@ describe('User Service Implementation', () => {
         interactivityPreference: 4,
       };
 
-      await expect(userService.postUserLearningPath(userId, learningPathInDTO)).rejects.toThrow(
-        'Method not implemented.'
+      const mockCreatedLearningPath = {
+        id: 'lp-new-123',
+        userId: userId,
+        primaryStyle: LEARNING_STYLES.VISUAL,
+        secondaryStyle: LEARNING_STYLES.AUDITORY,
+        pacePreference: PACE_PREFERENCE.NORMAL,
+        interactivityPreference: 4,
+        gamificationEnabled: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      };
+
+      learningPathsRepository.postUserLearningPath.mockResolvedValue(mockCreatedLearningPath);
+
+      const result = await userService.postUserLearningPath(userId, learningPathInDTO);
+
+      expect(result).toEqual(mockCreatedLearningPath);
+      expect(learningPathsRepository.postUserLearningPath).toHaveBeenCalledTimes(1);
+      expect(learningPathsRepository.postUserLearningPath).toHaveBeenCalledWith(
+        userId,
+        learningPathInDTO
       );
     });
   });
 
   describe('updateLearningPath', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call repository updateLearningPath with correct parameters', async () => {
       const userId = '12345';
       const learningPathUpdateDTO: Partial<LearningPathInDTO> = {
         primaryStyle: LEARNING_STYLES.KINESTHETIC,
+        pacePreference: PACE_PREFERENCE.FAST,
       };
 
-      await expect(userService.updateLearningPath(userId, learningPathUpdateDTO)).rejects.toThrow(
-        'Method not implemented.'
+      const mockUpdatedLearningPath = {
+        id: 'lp-123',
+        userId: userId,
+        primaryStyle: LEARNING_STYLES.KINESTHETIC,
+        secondaryStyle: LEARNING_STYLES.AUDITORY,
+        pacePreference: PACE_PREFERENCE.FAST,
+        interactivityPreference: 5,
+        gamificationEnabled: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-10'),
+      };
+
+      learningPathsRepository.updateLearningPath.mockResolvedValue(mockUpdatedLearningPath);
+
+      const result = await userService.updateLearningPath(userId, learningPathUpdateDTO);
+
+      expect(result).toEqual(mockUpdatedLearningPath);
+      expect(learningPathsRepository.updateLearningPath).toHaveBeenCalledTimes(1);
+      expect(learningPathsRepository.updateLearningPath).toHaveBeenCalledWith(
+        userId,
+        learningPathUpdateDTO
       );
     });
   });

@@ -13,14 +13,16 @@ import type {
   UserOutDTO,
   UserUpdateDTO,
 } from '../../models/index.js';
-import type { UsersRepository } from '../../repositories/index.js';
+import type { LearningPathsRepository, UsersRepository } from '../../repositories/index.js';
 import type UserService from '../interfaces/UserService.js';
 
 export default class UserServiceImpl implements UserService {
   private readonly userRepository: UsersRepository;
+  private readonly learningPathsRepository: LearningPathsRepository;
 
-  constructor(userRepository: UsersRepository) {
+  constructor(userRepository: UsersRepository, learningPathsRepository: LearningPathsRepository) {
     this.userRepository = userRepository;
+    this.learningPathsRepository = learningPathsRepository;
   }
 
   getUserByEmail(email: string, lightDTO: boolean): Promise<UserOutDTO> {
@@ -57,20 +59,20 @@ export default class UserServiceImpl implements UserService {
   async deleteUser(userId: string): Promise<void> {
     return this.userRepository.deleteUser(userId);
   }
-  async getUserLearningPath(_userId: string): Promise<LearningPathOutDTO> {
-    throw new Error('Method not implemented.');
+  async getUserLearningPath(userId: string): Promise<LearningPathOutDTO> {
+    return this.learningPathsRepository.getUserLearningPath(userId);
   }
   async postUserLearningPath(
-    _userId: string,
-    _learningPathInDTO: LearningPathInDTO
+    userId: string,
+    learningPathInDTO: LearningPathInDTO
   ): Promise<LearningPathOutDTO> {
-    throw new Error('Method not implemented.');
+    return this.learningPathsRepository.postUserLearningPath(userId, learningPathInDTO);
   }
   async updateLearningPath(
-    _userId: string,
-    _learningPathUpdateDTO: Partial<LearningPathInDTO>
+    userId: string,
+    learningPathUpdateDTO: Partial<LearningPathInDTO>
   ): Promise<LearningPathOutDTO> {
-    throw new Error('Method not implemented.');
+    return this.learningPathsRepository.updateLearningPath(userId, learningPathUpdateDTO);
   }
   async getUserReviews(
     _reviewerId: string,
