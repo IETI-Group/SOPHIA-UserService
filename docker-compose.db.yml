@@ -1,0 +1,22 @@
+services:
+  database-dev:
+    image: postgres:15-alpine
+    container_name: sophia-userservice-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-dev_db}
+      POSTGRES_USER: ${DB_USER:-dev_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dev_password}
+    ports:
+      - ${DB_PORT:-5433}:5432
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-dev_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Volúmenes para persistencia de datos
+volumes:
+  postgres_dev_data:

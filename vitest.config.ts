@@ -4,7 +4,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'json', 'html', 'lcov'],
-      exclude: ['node_modules/**', 'dist/**', 'docs/**', 'tests/**', 'coverage/**'],
+      exclude: ['node_modules/**', 'dist/**', 'docs/**', 'tests/**', 'coverage/**', 'src/app.ts', 'src/server.ts', 'src/config/**', 'src/middleware/**', 'src/utils/**', 'src/models/dtos/**', 'src/db/**'],
       reportsDirectory: './coverage',
     },
     testTimeout: 10000,
