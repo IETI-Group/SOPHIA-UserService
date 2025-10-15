@@ -15,6 +15,7 @@ import type {
 } from '../../models/index.js';
 import type {
   LearningPathsRepository,
+  LinkedAccountsRepository,
   ReviewsRepository,
   UsersRepository,
 } from '../../repositories/index.js';
@@ -24,15 +25,18 @@ export default class UserServiceImpl implements UserService {
   private readonly userRepository: UsersRepository;
   private readonly learningPathsRepository: LearningPathsRepository;
   private readonly reviewsRepository: ReviewsRepository;
+  private readonly linkedAccountsRepository: LinkedAccountsRepository;
 
   constructor(
     userRepository: UsersRepository,
     learningPathsRepository: LearningPathsRepository,
-    reviewsRepository: ReviewsRepository
+    reviewsRepository: ReviewsRepository,
+    linkedAccountsRepository: LinkedAccountsRepository
   ) {
     this.userRepository = userRepository;
     this.learningPathsRepository = learningPathsRepository;
     this.reviewsRepository = reviewsRepository;
+    this.linkedAccountsRepository = linkedAccountsRepository;
   }
 
   getUserByEmail(email: string, lightDTO: boolean): Promise<UserOutDTO> {
@@ -137,31 +141,31 @@ export default class UserServiceImpl implements UserService {
     return this.reviewsRepository.deleteReview(reviewId);
   }
   async getLinkedAccounts(
-    _userId: string,
-    _page: number,
-    _size: number,
-    _sort: string | undefined,
-    _order: 'asc' | 'desc'
+    userId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
   ): Promise<PaginatedLinkedAccounts> {
-    throw new Error('Method not implemented.');
+    return this.linkedAccountsRepository.getLinkedAccounts(userId, page, size, sort, order);
   }
-  async getLinkedAccount(_userId: string, _accountId: string): Promise<LinkedAccountOutDTO> {
-    throw new Error('Method not implemented.');
+  async getLinkedAccount(_userId: string, accountId: string): Promise<LinkedAccountOutDTO> {
+    return this.linkedAccountsRepository.getLinkedAccount(accountId);
   }
   async postLinkedAccount(
     _userId: string,
-    _linkedAccountIn: LinkedAccountInDTO
+    linkedAccountIn: LinkedAccountInDTO
   ): Promise<LinkedAccountOutDTO> {
-    throw new Error('Method not implemented.');
+    return this.linkedAccountsRepository.postLinkedAccount(linkedAccountIn);
   }
   async updateLinkedAccount(
     _userId: string,
-    _accountId: string,
-    _linkedAccountUpdate: Partial<LinkedAccountInDTO>
+    accountId: string,
+    linkedAccountUpdate: Partial<LinkedAccountInDTO>
   ): Promise<LinkedAccountOutDTO> {
-    throw new Error('Method not implemented.');
+    return this.linkedAccountsRepository.updateLinkedAccount(accountId, linkedAccountUpdate);
   }
-  async deleteLinkedAccount(_userId: string, _accountId: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async deleteLinkedAccount(_userId: string, accountId: string): Promise<void> {
+    return this.linkedAccountsRepository.deleteLinkedAccount(accountId);
   }
 }

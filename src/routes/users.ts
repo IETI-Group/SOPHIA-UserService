@@ -450,8 +450,8 @@ router.delete(
     }
     const userId = req.params.id;
     const accountId = req.params.accountId;
-    await userController.deleteLinkedAccount(userId, accountId);
-    res.status(200).end();
+    const result = await userController.deleteLinkedAccount(userId, accountId);
+    res.status(200).json(result);
   }
 );
 

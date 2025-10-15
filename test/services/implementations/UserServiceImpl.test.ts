@@ -10,6 +10,7 @@ import type {
 } from '../../../src/models/index.js';
 import type {
   LearningPathsRepository,
+  LinkedAccountsRepository,
   ReviewsRepository,
   UsersRepository,
 } from '../../../src/repositories/index.js';
@@ -25,16 +26,19 @@ describe('User Service Implementation', () => {
   const userRepository = mockDeep<UsersRepository>();
   const learningPathsRepository = mockDeep<LearningPathsRepository>();
   const reviewsRepository = mockDeep<ReviewsRepository>();
+  const linkedAccountsRepository = mockDeep<LinkedAccountsRepository>();
   const userService = new UserServiceImpl(
     userRepository,
     learningPathsRepository,
-    reviewsRepository
+    reviewsRepository,
+    linkedAccountsRepository
   );
 
   beforeEach(() => {
     mockReset(userRepository);
     mockReset(learningPathsRepository);
     mockReset(reviewsRepository);
+    mockReset(linkedAccountsRepository);
   });
 
   describe('getUsers', () => {
@@ -639,67 +643,271 @@ describe('User Service Implementation', () => {
   });
 
   describe('getLinkedAccounts', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call linkedAccountsRepository.getLinkedAccounts with correct parameters', async () => {
       const userId = '12345';
+      const page = 1;
+      const size = 10;
+      const sort = 'linked_at';
+      const order = 'desc' as 'asc' | 'desc';
 
-      await expect(userService.getLinkedAccounts(userId, 1, 10, 'platform', 'asc')).rejects.toThrow(
-        'Method not implemented.'
+      const mockResponse = {
+        success: true,
+        data: [
+          {
+            idLinkedAccount: 'account-1',
+            userId: userId,
+            provider: 'Google',
+            issuer: 'google.com',
+            idExternal: 'google-123',
+            email: 'user@gmail.com',
+            emailVerified: true,
+            isPrimary: true,
+            linkedAt: new Date('2024-01-01'),
+          },
+        ],
+        message: 'Linked accounts retrieved successfully',
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      linkedAccountsRepository.getLinkedAccounts.mockResolvedValue(mockResponse);
+
+      const result = await userService.getLinkedAccounts(userId, page, size, sort, order);
+
+      expect(result).toEqual(mockResponse);
+      expect(linkedAccountsRepository.getLinkedAccounts).toHaveBeenCalledTimes(1);
+      expect(linkedAccountsRepository.getLinkedAccounts).toHaveBeenCalledWith(
+        userId,
+        page,
+        size,
+        sort,
+        order
+      );
+    });
+
+    it('should call linkedAccountsRepository.getLinkedAccounts with undefined optional parameters', async () => {
+      const userId = '12345';
+      const page = 1;
+      const size = 10;
+
+      const mockResponse = {
+        success: true,
+        data: [],
+        message: 'Linked accounts retrieved successfully',
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      linkedAccountsRepository.getLinkedAccounts.mockResolvedValue(mockResponse);
+
+      await userService.getLinkedAccounts(userId, page, size, undefined, 'asc');
+
+      expect(linkedAccountsRepository.getLinkedAccounts).toHaveBeenCalledWith(
+        userId,
+        page,
+        size,
+        undefined,
+        'asc'
       );
     });
   });
 
   describe('getLinkedAccount', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call linkedAccountsRepository.getLinkedAccount with correct parameters', async () => {
       const userId = '12345';
-      const accountId = 'account123';
+      const accountId = 'account-123';
 
-      await expect(userService.getLinkedAccount(userId, accountId)).rejects.toThrow(
-        'Method not implemented.'
-      );
+      const mockLinkedAccount = {
+        idLinkedAccount: accountId,
+        userId: userId,
+        provider: 'GitHub',
+        issuer: 'github.com',
+        idExternal: 'github-456',
+        email: 'user@github.com',
+        emailVerified: false,
+        isPrimary: false,
+        linkedAt: new Date('2024-01-01'),
+      };
+
+      linkedAccountsRepository.getLinkedAccount.mockResolvedValue(mockLinkedAccount);
+
+      const result = await userService.getLinkedAccount(userId, accountId);
+
+      expect(result).toEqual(mockLinkedAccount);
+      expect(linkedAccountsRepository.getLinkedAccount).toHaveBeenCalledTimes(1);
+      expect(linkedAccountsRepository.getLinkedAccount).toHaveBeenCalledWith(accountId);
     });
   });
 
   describe('postLinkedAccount', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call linkedAccountsRepository.postLinkedAccount with correct parameters', async () => {
       const userId = '12345';
       const linkedAccountInDTO: LinkedAccountInDTO = {
         userId: userId,
         provider: 'GitHub',
         issuer: 'github.com',
-        idExternal: 'user123',
+        idExternal: 'github-user123',
         email: 'user@github.com',
         isPrimary: false,
       };
 
-      await expect(userService.postLinkedAccount(userId, linkedAccountInDTO)).rejects.toThrow(
-        'Method not implemented.'
-      );
+      const mockCreatedAccount = {
+        idLinkedAccount: 'new-account-123',
+        userId: userId,
+        provider: linkedAccountInDTO.provider,
+        issuer: linkedAccountInDTO.issuer,
+        idExternal: linkedAccountInDTO.idExternal,
+        email: linkedAccountInDTO.email,
+        emailVerified: false,
+        isPrimary: linkedAccountInDTO.isPrimary,
+        linkedAt: new Date('2024-01-01'),
+      };
+
+      linkedAccountsRepository.postLinkedAccount.mockResolvedValue(mockCreatedAccount);
+
+      const result = await userService.postLinkedAccount(userId, linkedAccountInDTO);
+
+      expect(result).toEqual(mockCreatedAccount);
+      expect(linkedAccountsRepository.postLinkedAccount).toHaveBeenCalledTimes(1);
+      expect(linkedAccountsRepository.postLinkedAccount).toHaveBeenCalledWith(linkedAccountInDTO);
+    });
+
+    it('should call linkedAccountsRepository.postLinkedAccount for primary account', async () => {
+      const userId = '12345';
+      const linkedAccountInDTO: LinkedAccountInDTO = {
+        userId: userId,
+        provider: 'Google',
+        issuer: 'accounts.google.com',
+        idExternal: 'google-user456',
+        email: 'user@gmail.com',
+        isPrimary: true,
+      };
+
+      const mockCreatedAccount = {
+        idLinkedAccount: 'new-account-456',
+        userId: userId,
+        provider: linkedAccountInDTO.provider,
+        issuer: linkedAccountInDTO.issuer,
+        idExternal: linkedAccountInDTO.idExternal,
+        email: linkedAccountInDTO.email,
+        emailVerified: false,
+        isPrimary: true,
+        linkedAt: new Date('2024-01-01'),
+      };
+
+      linkedAccountsRepository.postLinkedAccount.mockResolvedValue(mockCreatedAccount);
+
+      const result = await userService.postLinkedAccount(userId, linkedAccountInDTO);
+
+      expect(result).toEqual(mockCreatedAccount);
+      expect(linkedAccountsRepository.postLinkedAccount).toHaveBeenCalledWith(linkedAccountInDTO);
     });
   });
 
   describe('updateLinkedAccount', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call linkedAccountsRepository.updateLinkedAccount with correct parameters', async () => {
       const userId = '12345';
-      const accountId = 'account123';
+      const accountId = 'account-123';
       const linkedAccountUpdateDTO: Partial<LinkedAccountInDTO> = {
         provider: 'GitLab',
         isPrimary: true,
       };
 
-      await expect(
-        userService.updateLinkedAccount(userId, accountId, linkedAccountUpdateDTO)
-      ).rejects.toThrow('Method not implemented.');
+      const mockUpdatedAccount = {
+        idLinkedAccount: accountId,
+        userId: userId,
+        provider: 'GitLab',
+        issuer: 'gitlab.com',
+        idExternal: 'gitlab-123',
+        email: 'user@gitlab.com',
+        emailVerified: true,
+        isPrimary: true,
+        linkedAt: new Date('2024-01-01'),
+      };
+
+      linkedAccountsRepository.updateLinkedAccount.mockResolvedValue(mockUpdatedAccount);
+
+      const result = await userService.updateLinkedAccount(
+        userId,
+        accountId,
+        linkedAccountUpdateDTO
+      );
+
+      expect(result).toEqual(mockUpdatedAccount);
+      expect(linkedAccountsRepository.updateLinkedAccount).toHaveBeenCalledTimes(1);
+      expect(linkedAccountsRepository.updateLinkedAccount).toHaveBeenCalledWith(
+        accountId,
+        linkedAccountUpdateDTO
+      );
+    });
+
+    it('should call linkedAccountsRepository.updateLinkedAccount with partial update', async () => {
+      const userId = '12345';
+      const accountId = 'account-456';
+      const linkedAccountUpdateDTO: Partial<LinkedAccountInDTO> = {
+        email: 'newemail@example.com',
+      };
+
+      const mockUpdatedAccount = {
+        idLinkedAccount: accountId,
+        userId: userId,
+        provider: 'Google',
+        issuer: 'google.com',
+        idExternal: 'google-123',
+        email: 'newemail@example.com',
+        emailVerified: true,
+        isPrimary: false,
+        linkedAt: new Date('2024-01-01'),
+      };
+
+      linkedAccountsRepository.updateLinkedAccount.mockResolvedValue(mockUpdatedAccount);
+
+      await userService.updateLinkedAccount(userId, accountId, linkedAccountUpdateDTO);
+
+      expect(linkedAccountsRepository.updateLinkedAccount).toHaveBeenCalledWith(
+        accountId,
+        linkedAccountUpdateDTO
+      );
     });
   });
 
   describe('deleteLinkedAccount', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call linkedAccountsRepository.deleteLinkedAccount with correct parameters', async () => {
       const userId = '12345';
-      const accountId = 'account123';
+      const accountId = 'account-123';
 
-      await expect(userService.deleteLinkedAccount(userId, accountId)).rejects.toThrow(
-        'Method not implemented.'
-      );
+      linkedAccountsRepository.deleteLinkedAccount.mockResolvedValue();
+
+      await userService.deleteLinkedAccount(userId, accountId);
+
+      expect(linkedAccountsRepository.deleteLinkedAccount).toHaveBeenCalledTimes(1);
+      expect(linkedAccountsRepository.deleteLinkedAccount).toHaveBeenCalledWith(accountId);
+    });
+
+    it('should call linkedAccountsRepository.deleteLinkedAccount and return void', async () => {
+      const userId = '12345';
+      const accountId = 'account-456';
+
+      linkedAccountsRepository.deleteLinkedAccount.mockResolvedValue();
+
+      const result = await userService.deleteLinkedAccount(userId, accountId);
+
+      expect(result).toBeUndefined();
+      expect(linkedAccountsRepository.deleteLinkedAccount).toHaveBeenCalledWith(accountId);
     });
   });
 
