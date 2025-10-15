@@ -1,7 +1,10 @@
 import { asClass, asValue, createContainer, InjectionMode, Lifetime } from 'awilix';
 import UserController from '../controllers/UserController.js';
-import { UsersRepositoryPostgreSQL } from '../repositories/index.js';
-import { LearningPathsRepositoryPostgreSQL } from '../repositories/postgresql/LearningPathsRepositoryPostgreSQL.js';
+import {
+  LearningPathsRepositoryPostgreSQL,
+  ReviewsRepositoryPostgreSQL,
+  UsersRepositoryPostgreSQL,
+} from '../repositories/index.js';
 import { UserServiceImpl } from '../services/index.js';
 import { logger } from '../utils/logger.js';
 import { db } from './db.js';
@@ -15,6 +18,10 @@ container.register({
   drizzleClient: asValue(db),
 
   learningPathsRepository: asClass(LearningPathsRepositoryPostgreSQL, {
+    lifetime: Lifetime.SINGLETON,
+  }),
+
+  reviewsRepository: asClass(ReviewsRepositoryPostgreSQL, {
     lifetime: Lifetime.SINGLETON,
   }),
 
