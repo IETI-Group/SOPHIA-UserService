@@ -1,4 +1,6 @@
+import { and, asc, count, desc, eq, type SQL } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
+import { linked_accounts, users } from '../../db/schema.js';
 import type {
   LinkedAccountInDTO,
   LinkedAccountOutDTO,
@@ -12,29 +14,164 @@ export class LinkedAccountsRepositoryPostgreSQL implements LinkedAccountsReposit
     this.client = drizzleClient;
   }
 
-  getLinkedAccounts(
-    _userId: string,
-    _page: number,
-    _size: number,
-    _sort?: string,
-    _order?: string
+  private parseLinkedAccountToDTO(
+    account: typeof linked_accounts.$inferSelect
+  ): LinkedAccountOutDTO {
+    return {
+      idLinkedAccount: account.id_linked_account,
+      userId: account.user_id,
+      provider: account.provider,
+      issuer: account.issuer,
+      idExternal: account.external_id,
+      email: account.email ?? '',
+      emailVerified: account.email_verified,
+      isPrimary: account.is_primary,
+      linkedAt: account.linked_at,
+    };
+  }
+
+  public async getLinkedAccounts(
+    userId: string,
+    page: number,
+    size: number,
+    sort?: string,
+    order?: string
   ): Promise<PaginatedLinkedAccounts> {
-    this.client;
-    throw new Error('Method not implemented.');
+    const whereConditions: SQL<unknown>[] = [eq(linked_accounts.user_id, userId)];
+
+    const sortField = sort === 'linked_at' ? linked_accounts.linked_at : linked_accounts.linked_at;
+    const orderFn = order === 'asc' ? asc : desc;
+    const offset = (page - 1) * size;
+
+    const accountsData = await this.client
+      .select()
+      .from(linked_accounts)
+      .where(and(...whereConditions))
+      .orderBy(orderFn(sortField))
+      .limit(size)
+      .offset(offset);
+
+    const countResult = await this.client
+      .select({ count: count() })
+      .from(linked_accounts)
+      .where(and(...whereConditions));
+
+    const total = Number(countResult[0]?.count ?? 0);
+    const totalPages = Math.ceil(total / size);
+
+    const accountsDTOs = accountsData.map((account) => this.parseLinkedAccountToDTO(account));
+
+    return {
+      success: true,
+      data: accountsDTOs,
+      message: 'Linked accounts retrieved successfully',
+      timestamp: new Date().toISOString(),
+      pagination: {
+        page,
+        limit: size,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
   }
-  getLinkedAccount(_accountId: string): Promise<LinkedAccountOutDTO> {
-    throw new Error('Method not implemented.');
+
+  public async getLinkedAccount(accountId: string): Promise<LinkedAccountOutDTO> {
+    const [account] = await this.client
+      .select()
+      .from(linked_accounts)
+      .where(eq(linked_accounts.id_linked_account, accountId));
+
+    if (!account) {
+      throw new Error('Linked account not found');
+    }
+
+    return this.parseLinkedAccountToDTO(account);
   }
-  postLinkedAccount(_linkedAccountIn: LinkedAccountInDTO): Promise<LinkedAccountOutDTO> {
-    throw new Error('Method not implemented.');
-  }
-  updateLinkedAccount(
-    _accountId: string,
-    _linkedAccountUpdate: Partial<LinkedAccountInDTO>
+
+  public async postLinkedAccount(
+    linkedAccountIn: LinkedAccountInDTO
   ): Promise<LinkedAccountOutDTO> {
-    throw new Error('Method not implemented.');
+    // Validate that user exists
+    const [user] = await this.client
+      .select({ id_user: users.id_user })
+      .from(users)
+      .where(eq(users.id_user, linkedAccountIn.userId));
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const [createdAccount] = await this.client
+      .insert(linked_accounts)
+      .values({
+        user_id: linkedAccountIn.userId,
+        provider: linkedAccountIn.provider,
+        issuer: linkedAccountIn.issuer,
+        external_id: linkedAccountIn.idExternal,
+        email: linkedAccountIn.email,
+        is_primary: linkedAccountIn.isPrimary,
+        email_verified: false, // Default to false
+      })
+      .returning();
+
+    return this.parseLinkedAccountToDTO(createdAccount);
   }
-  deleteLinkedAccount(_accountId: string): Promise<void> {
-    throw new Error('Method not implemented.');
+
+  public async updateLinkedAccount(
+    accountId: string,
+    linkedAccountUpdate: Partial<LinkedAccountInDTO>
+  ): Promise<LinkedAccountOutDTO> {
+    const updateFields: Partial<{
+      provider: string;
+      issuer: string;
+      external_id: string;
+      email: string;
+      is_primary: boolean;
+    }> = {};
+
+    if (linkedAccountUpdate.provider !== undefined) {
+      updateFields.provider = linkedAccountUpdate.provider;
+    }
+    if (linkedAccountUpdate.issuer !== undefined) {
+      updateFields.issuer = linkedAccountUpdate.issuer;
+    }
+    if (linkedAccountUpdate.idExternal !== undefined) {
+      updateFields.external_id = linkedAccountUpdate.idExternal;
+    }
+    if (linkedAccountUpdate.email !== undefined) {
+      updateFields.email = linkedAccountUpdate.email;
+    }
+    if (linkedAccountUpdate.isPrimary !== undefined) {
+      updateFields.is_primary = linkedAccountUpdate.isPrimary;
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      throw new Error('At least one field must be provided to update');
+    }
+
+    const [updatedAccount] = await this.client
+      .update(linked_accounts)
+      .set(updateFields)
+      .where(eq(linked_accounts.id_linked_account, accountId))
+      .returning();
+
+    if (!updatedAccount) {
+      throw new Error('Linked account not found');
+    }
+
+    return this.parseLinkedAccountToDTO(updatedAccount);
+  }
+
+  public async deleteLinkedAccount(accountId: string): Promise<void> {
+    const [deletedAccount] = await this.client
+      .delete(linked_accounts)
+      .where(eq(linked_accounts.id_linked_account, accountId))
+      .returning();
+
+    if (!deletedAccount) {
+      throw new Error('Linked account not found');
+    }
   }
 }

@@ -21,7 +21,7 @@ describe('Linked Accounts Repository', () => {
           user_id: userId,
           provider: 'Google',
           issuer: 'google.com',
-          id_external: 'google-123',
+          external_id: 'google-123',
           email: 'user@gmail.com',
           email_verified: true,
           is_primary: true,
@@ -32,7 +32,7 @@ describe('Linked Accounts Repository', () => {
           user_id: userId,
           provider: 'GitHub',
           issuer: 'github.com',
-          id_external: 'github-456',
+          external_id: 'github-456',
           email: 'user@github.com',
           email_verified: false,
           is_primary: false,
@@ -46,7 +46,7 @@ describe('Linked Accounts Repository', () => {
       const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
       const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
 
-      drizzleClient.select.mockReturnValue({
+      drizzleClient.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue(fromMock),
       } as unknown as ReturnType<typeof drizzleClient.select>);
 
@@ -76,7 +76,7 @@ describe('Linked Accounts Repository', () => {
       const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
       const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
 
-      drizzleClient.select.mockReturnValue({
+      drizzleClient.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue(fromMock),
       } as unknown as ReturnType<typeof drizzleClient.select>);
 
@@ -102,7 +102,7 @@ describe('Linked Accounts Repository', () => {
           user_id: userId,
           provider: 'GitHub',
           issuer: 'github.com',
-          id_external: 'github-456',
+          external_id: 'github-456',
           email: 'user@github.com',
           email_verified: false,
           is_primary: false,
@@ -113,7 +113,7 @@ describe('Linked Accounts Repository', () => {
           user_id: userId,
           provider: 'Google',
           issuer: 'google.com',
-          id_external: 'google-123',
+          external_id: 'google-123',
           email: 'user@gmail.com',
           email_verified: true,
           is_primary: true,
@@ -127,7 +127,7 @@ describe('Linked Accounts Repository', () => {
       const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
       const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
 
-      drizzleClient.select.mockReturnValue({
+      drizzleClient.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue(fromMock),
       } as unknown as ReturnType<typeof drizzleClient.select>);
 
@@ -160,7 +160,7 @@ describe('Linked Accounts Repository', () => {
           user_id: userId,
           provider: 'Twitter',
           issuer: 'twitter.com',
-          id_external: 'twitter-789',
+          external_id: 'twitter-789',
           email: 'user@twitter.com',
           email_verified: true,
           is_primary: false,
@@ -174,7 +174,7 @@ describe('Linked Accounts Repository', () => {
       const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
       const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
 
-      drizzleClient.select.mockReturnValue({
+      drizzleClient.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue(fromMock),
       } as unknown as ReturnType<typeof drizzleClient.select>);
 
@@ -205,7 +205,7 @@ describe('Linked Accounts Repository', () => {
         user_id: 'user-123',
         provider: 'Google',
         issuer: 'google.com',
-        id_external: 'google-123',
+        external_id: 'google-123',
         email: 'user@gmail.com',
         email_verified: true,
         is_primary: true,
@@ -260,12 +260,19 @@ describe('Linked Accounts Repository', () => {
         user_id: linkedAccountIn.userId,
         provider: linkedAccountIn.provider,
         issuer: linkedAccountIn.issuer,
-        id_external: linkedAccountIn.idExternal,
+        external_id: linkedAccountIn.idExternal,
         email: linkedAccountIn.email,
         email_verified: false,
         is_primary: linkedAccountIn.isPrimary,
         linked_at: new Date('2024-01-01'),
       };
+
+      // Mock user validation query
+      const whereMock = vi.fn().mockResolvedValue([{ id_user: linkedAccountIn.userId }]);
+      const fromMock = { where: whereMock };
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
 
       const returningMock = vi.fn().mockResolvedValue([mockCreatedAccount]);
       const valuesMock = { returning: returningMock };
@@ -299,12 +306,19 @@ describe('Linked Accounts Repository', () => {
         user_id: linkedAccountIn.userId,
         provider: linkedAccountIn.provider,
         issuer: linkedAccountIn.issuer,
-        id_external: linkedAccountIn.idExternal,
+        external_id: linkedAccountIn.idExternal,
         email: linkedAccountIn.email,
         email_verified: false,
         is_primary: linkedAccountIn.isPrimary,
         linked_at: new Date('2024-01-01'),
       };
+
+      // Mock user validation query
+      const whereMock = vi.fn().mockResolvedValue([{ id_user: linkedAccountIn.userId }]);
+      const fromMock = { where: whereMock };
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
 
       const returningMock = vi.fn().mockResolvedValue([mockCreatedAccount]);
       const valuesMock = { returning: returningMock };
@@ -329,15 +343,16 @@ describe('Linked Accounts Repository', () => {
         isPrimary: true,
       };
 
-      const returningMock = vi.fn().mockRejectedValue(new Error('Foreign key constraint'));
-      const valuesMock = { returning: returningMock };
-      const insertMock = { values: vi.fn().mockReturnValue(valuesMock) };
+      // Mock user validation query returning empty array
+      const whereMock = vi.fn().mockResolvedValue([]);
+      const fromMock = { where: whereMock };
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
 
-      drizzleClient.insert.mockReturnValue(
-        insertMock as unknown as ReturnType<typeof drizzleClient.insert>
+      await expect(linkedAccountsRepository.postLinkedAccount(linkedAccountIn)).rejects.toThrow(
+        'User not found'
       );
-
-      await expect(linkedAccountsRepository.postLinkedAccount(linkedAccountIn)).rejects.toThrow();
     });
   });
 
@@ -356,7 +371,7 @@ describe('Linked Accounts Repository', () => {
         user_id: 'user-123',
         provider: 'Google Updated',
         issuer: 'accounts.google.com',
-        id_external: 'google-123',
+        external_id: 'google-123',
         email: 'newemail@gmail.com',
         email_verified: true,
         is_primary: false,
@@ -391,7 +406,7 @@ describe('Linked Accounts Repository', () => {
         user_id: 'user-123',
         provider: 'Google',
         issuer: 'google.com',
-        id_external: 'google-123',
+        external_id: 'google-123',
         email: 'user@gmail.com',
         email_verified: true,
         is_primary: true,
@@ -452,7 +467,7 @@ describe('Linked Accounts Repository', () => {
         user_id: 'user-123',
         provider: 'Google',
         issuer: 'google.com',
-        id_external: 'google-123',
+        external_id: 'google-123',
         email: 'user@gmail.com',
         email_verified: true,
         is_primary: true,
