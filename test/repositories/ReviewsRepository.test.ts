@@ -489,11 +489,11 @@ describe('ReviewsRepository', () => {
         {
           id_review: reviewId,
           reviewer_id: 'reviewer-123',
-          rate: 5,
-          recommended: true,
-          comments: 'Original comment',
+          rate: 4,
+          recommended: false,
+          comments: 'Updated comment',
           created_at: new Date('2024-01-01'),
-          updated_at: null,
+          updated_at: new Date('2024-01-20'),
           instructors_reviews: {
             id_instructor_review: reviewId,
             instructor_id: 'instructor-1',
@@ -553,11 +553,11 @@ describe('ReviewsRepository', () => {
         {
           id_review: reviewId,
           reviewer_id: 'reviewer-123',
-          rate: 5,
+          rate: 3,
           recommended: true,
           comments: 'Original comment',
           created_at: new Date('2024-01-01'),
-          updated_at: null,
+          updated_at: new Date('2024-01-20'),
           instructors_reviews: {
             id_instructor_review: reviewId,
             instructor_id: 'instructor-1',
