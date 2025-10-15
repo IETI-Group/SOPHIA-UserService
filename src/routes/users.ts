@@ -325,7 +325,7 @@ router.delete(
     const reviewId = req.params.reviewId;
     const userId = req.params.id;
     const response = await userController.deleteReview(userId, reviewId);
-    res.status(204).json(response);
+    res.status(200).json(response);
   }
 );
 
@@ -405,7 +405,7 @@ router.delete(
     const userId = req.params.id;
     const accountId = req.params.accountId;
     await userController.deleteLinkedAccount(userId, accountId);
-    res.status(204).end();
+    res.status(200).end();
   }
 );
 

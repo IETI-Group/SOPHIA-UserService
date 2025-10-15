@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, isNotNull, or } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
-import { courses_reviews, instructors_reviews, reviews } from '../../db/schema.js';
+import { courses_reviews, instructors, instructors_reviews, reviews } from '../../db/schema.js';
 import type { PaginatedReviews, ReviewInDTO, ReviewOutDTO } from '../../models/index.js';
 import { REVIEW_DISCRIMINANT } from '../../utils/types.js';
 import type { ReviewsRepository } from '../ReviewsRepository.js';
@@ -203,6 +203,18 @@ export class ReviewsRepositoryPostgreSQL implements ReviewsRepository {
   }
 
   public async postReview(reviewIn: ReviewInDTO): Promise<ReviewOutDTO> {
+    // Validate that instructor exists if discriminant is INSTRUCTOR
+    if (reviewIn.discriminant === REVIEW_DISCRIMINANT.INSTRUCTOR) {
+      const instructor = await this.client
+        .select({ id_instructor: instructors.id_instructor })
+        .from(instructors)
+        .where(eq(instructors.id_instructor, reviewIn.reviewedId));
+
+      if (!instructor || instructor.length === 0) {
+        throw new Error('Instructor not found');
+      }
+    }
+
     const [createdReview] = await this.client
       .insert(reviews)
       .values({
@@ -237,7 +249,6 @@ export class ReviewsRepositoryPostgreSQL implements ReviewsRepository {
       updatedAt: createdReview.updated_at ?? createdReview.created_at,
     };
   }
-
   public async updateReview(
     reviewId: string,
     reviewUpdate: Partial<ReviewInDTO>

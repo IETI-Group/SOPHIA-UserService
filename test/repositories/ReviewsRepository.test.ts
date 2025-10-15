@@ -327,6 +327,13 @@ describe('ReviewsRepository', () => {
         instructor_id: reviewIn.reviewedId,
       };
 
+      // Mock instructor validation
+      const whereInstructorMock = vi.fn().mockResolvedValue([{ id_instructor: 'instructor-1' }]);
+      const fromInstructorMock = { where: whereInstructorMock };
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromInstructorMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
       const returningMock = vi.fn().mockResolvedValue([mockCreatedReview]);
       const valuesMock = { returning: returningMock };
       const insertMock = { values: vi.fn().mockReturnValue(valuesMock) };
@@ -436,6 +443,13 @@ describe('ReviewsRepository', () => {
         instructor_id: reviewIn.reviewedId,
       };
 
+      // Mock instructor validation
+      const whereInstructorMock = vi.fn().mockResolvedValue([{ id_instructor: 'instructor-1' }]);
+      const fromInstructorMock = { where: whereInstructorMock };
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromInstructorMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
       const returningMock = vi.fn().mockResolvedValue([mockCreatedReview]);
       const valuesMock = { returning: returningMock };
       const insertMock = { values: vi.fn().mockReturnValue(valuesMock) };
@@ -454,6 +468,26 @@ describe('ReviewsRepository', () => {
       const result = await reviewsRepository.postReview(reviewIn);
 
       expect(result.comments).toBeUndefined();
+    });
+
+    it('should throw error when instructor not found', async () => {
+      const reviewIn: ReviewInDTO = {
+        reviewerId: 'reviewer-123',
+        reviewedId: 'nonexistent-instructor',
+        discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+        rate: 5,
+        recommended: true,
+        comments: 'Great instructor!',
+      };
+
+      // Mock instructor validation - instructor not found
+      const whereInstructorMock = vi.fn().mockResolvedValue([]);
+      const fromInstructorMock = { where: whereInstructorMock };
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromInstructorMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      await expect(reviewsRepository.postReview(reviewIn)).rejects.toThrow('Instructor not found');
     });
   });
 

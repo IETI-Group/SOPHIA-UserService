@@ -576,7 +576,7 @@ describe('Users Routes Validation Tests', () => {
 
       const response = await request(app).delete('/api/v1/users/validUserId123/reviews/review123');
 
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(200);
     });
   });
 
@@ -977,7 +977,7 @@ describe('Users Routes Validation Tests', () => {
         '/api/v1/users/validUserId123/linked-accounts/account123'
       );
 
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(200);
     });
   });
 

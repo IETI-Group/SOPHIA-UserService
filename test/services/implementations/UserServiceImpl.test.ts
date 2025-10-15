@@ -8,7 +8,11 @@ import type {
   UserInDTO,
   UserUpdateDTO,
 } from '../../../src/models/index.js';
-import type { LearningPathsRepository, UsersRepository } from '../../../src/repositories/index.js';
+import type {
+  LearningPathsRepository,
+  ReviewsRepository,
+  UsersRepository,
+} from '../../../src/repositories/index.js';
 import UserServiceImpl from '../../../src/services/implementations/UserServiceImpl.js';
 import {
   LEARNING_STYLES,
@@ -20,11 +24,17 @@ import {
 describe('User Service Implementation', () => {
   const userRepository = mockDeep<UsersRepository>();
   const learningPathsRepository = mockDeep<LearningPathsRepository>();
-  const userService = new UserServiceImpl(userRepository, learningPathsRepository);
+  const reviewsRepository = mockDeep<ReviewsRepository>();
+  const userService = new UserServiceImpl(
+    userRepository,
+    learningPathsRepository,
+    reviewsRepository
+  );
 
   beforeEach(() => {
     mockReset(userRepository);
     mockReset(learningPathsRepository);
+    mockReset(reviewsRepository);
   });
 
   describe('getUsers', () => {
@@ -373,52 +383,258 @@ describe('User Service Implementation', () => {
   });
 
   describe('getUserReviews', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call reviewsRepository.getUserReviews with correct parameters', async () => {
       const reviewerId = '12345';
+      const page = 1;
+      const size = 10;
+      const sort = 'created_at';
+      const order = 'desc' as 'asc' | 'desc';
+      const showInstructors = true;
+      const showCourses = false;
+      const reviewedId = 'instructor-123';
 
-      await expect(
-        userService.getUserReviews(reviewerId, 1, 10, 'createdAt', 'desc', true, false, undefined)
-      ).rejects.toThrow('Method not implemented.');
+      const mockResponse = {
+        success: true,
+        data: [
+          {
+            id: 'review-1',
+            reviewerId: reviewerId,
+            reviewedId: reviewedId,
+            discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+            rate: 5,
+            recommended: true,
+            comments: 'Great instructor!',
+            createdAt: new Date('2024-01-01'),
+            updatedAt: new Date('2024-01-01'),
+          },
+        ],
+        message: 'Reviews retrieved successfully',
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      reviewsRepository.getUserReviews.mockResolvedValue(mockResponse);
+
+      const result = await userService.getUserReviews(
+        reviewerId,
+        page,
+        size,
+        sort,
+        order,
+        showInstructors,
+        showCourses,
+        reviewedId
+      );
+
+      expect(result).toEqual(mockResponse);
+      expect(reviewsRepository.getUserReviews).toHaveBeenCalledTimes(1);
+      expect(reviewsRepository.getUserReviews).toHaveBeenCalledWith(
+        reviewerId,
+        page,
+        size,
+        sort,
+        order,
+        showInstructors,
+        showCourses,
+        reviewedId
+      );
+    });
+
+    it('should call reviewsRepository.getUserReviews with optional parameters undefined', async () => {
+      const reviewerId = '12345';
+      const page = 1;
+      const size = 10;
+
+      const mockResponse = {
+        success: true,
+        data: [],
+        message: 'Reviews retrieved successfully',
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      reviewsRepository.getUserReviews.mockResolvedValue(mockResponse);
+
+      await userService.getUserReviews(
+        reviewerId,
+        page,
+        size,
+        undefined,
+        'desc',
+        undefined,
+        undefined,
+        undefined
+      );
+
+      expect(reviewsRepository.getUserReviews).toHaveBeenCalledWith(
+        reviewerId,
+        page,
+        size,
+        undefined,
+        'desc',
+        undefined,
+        undefined,
+        undefined
+      );
     });
   });
 
   describe('postReview', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call reviewsRepository.postReview with correct parameters', async () => {
       const reviewInDTO: ReviewInDTO = {
         reviewerId: '12345',
-        reviewedId: 'review1',
+        reviewedId: 'instructor-456',
         rate: 5,
         recommended: true,
-        comments: 'Great!',
+        comments: 'Great instructor!',
         discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
       };
 
-      await expect(userService.postReview(reviewInDTO)).rejects.toThrow('Method not implemented.');
+      const mockCreatedReview = {
+        id: 'review-new-123',
+        reviewerId: reviewInDTO.reviewerId,
+        reviewedId: reviewInDTO.reviewedId,
+        discriminant: reviewInDTO.discriminant,
+        rate: reviewInDTO.rate,
+        recommended: reviewInDTO.recommended,
+        comments: reviewInDTO.comments,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      };
+
+      reviewsRepository.postReview.mockResolvedValue(mockCreatedReview);
+
+      const result = await userService.postReview(reviewInDTO);
+
+      expect(result).toEqual(mockCreatedReview);
+      expect(reviewsRepository.postReview).toHaveBeenCalledTimes(1);
+      expect(reviewsRepository.postReview).toHaveBeenCalledWith(reviewInDTO);
+    });
+
+    it('should call reviewsRepository.postReview for course review', async () => {
+      const reviewInDTO: ReviewInDTO = {
+        reviewerId: '12345',
+        reviewedId: 'course-789',
+        rate: 4,
+        recommended: true,
+        discriminant: REVIEW_DISCRIMINANT.COURSE,
+      };
+
+      const mockCreatedReview = {
+        id: 'review-new-456',
+        reviewerId: reviewInDTO.reviewerId,
+        reviewedId: reviewInDTO.reviewedId,
+        discriminant: reviewInDTO.discriminant,
+        rate: reviewInDTO.rate,
+        recommended: reviewInDTO.recommended,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      };
+
+      reviewsRepository.postReview.mockResolvedValue(mockCreatedReview);
+
+      const result = await userService.postReview(reviewInDTO);
+
+      expect(result).toEqual(mockCreatedReview);
+      expect(reviewsRepository.postReview).toHaveBeenCalledWith(reviewInDTO);
     });
   });
 
   describe('updateReview', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call reviewsRepository.updateReview with correct parameters', async () => {
       const userId = '12345';
-      const reviewId = 'review123';
+      const reviewId = 'review-123';
       const reviewUpdateDTO: Partial<ReviewInDTO> = {
         rate: 4,
+        recommended: false,
+        comments: 'Updated comment',
       };
 
-      await expect(userService.updateReview(userId, reviewId, reviewUpdateDTO)).rejects.toThrow(
-        'Method not implemented.'
-      );
+      const mockUpdatedReview = {
+        id: reviewId,
+        reviewerId: userId,
+        reviewedId: 'instructor-456',
+        discriminant: REVIEW_DISCRIMINANT.INSTRUCTOR,
+        rate: 4,
+        recommended: false,
+        comments: 'Updated comment',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-15'),
+      };
+
+      reviewsRepository.updateReview.mockResolvedValue(mockUpdatedReview);
+
+      const result = await userService.updateReview(userId, reviewId, reviewUpdateDTO);
+
+      expect(result).toEqual(mockUpdatedReview);
+      expect(reviewsRepository.updateReview).toHaveBeenCalledTimes(1);
+      expect(reviewsRepository.updateReview).toHaveBeenCalledWith(reviewId, reviewUpdateDTO);
+    });
+
+    it('should call reviewsRepository.updateReview with partial update', async () => {
+      const userId = '12345';
+      const reviewId = 'review-123';
+      const reviewUpdateDTO: Partial<ReviewInDTO> = {
+        rate: 3,
+      };
+
+      const mockUpdatedReview = {
+        id: reviewId,
+        reviewerId: userId,
+        reviewedId: 'course-789',
+        discriminant: REVIEW_DISCRIMINANT.COURSE,
+        rate: 3,
+        recommended: true,
+        comments: 'Original comment',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-15'),
+      };
+
+      reviewsRepository.updateReview.mockResolvedValue(mockUpdatedReview);
+
+      await userService.updateReview(userId, reviewId, reviewUpdateDTO);
+
+      expect(reviewsRepository.updateReview).toHaveBeenCalledWith(reviewId, reviewUpdateDTO);
     });
   });
 
   describe('deleteReview', () => {
-    it('should throw error for not implemented method', async () => {
+    it('should call reviewsRepository.deleteReview with correct parameters', async () => {
       const userId = '12345';
-      const reviewId = 'review123';
+      const reviewId = 'review-123';
 
-      await expect(userService.deleteReview(userId, reviewId)).rejects.toThrow(
-        'Method not implemented.'
-      );
+      reviewsRepository.deleteReview.mockResolvedValue();
+
+      await userService.deleteReview(userId, reviewId);
+
+      expect(reviewsRepository.deleteReview).toHaveBeenCalledTimes(1);
+      expect(reviewsRepository.deleteReview).toHaveBeenCalledWith(reviewId);
+    });
+
+    it('should call reviewsRepository.deleteReview and return void', async () => {
+      const userId = '12345';
+      const reviewId = 'review-456';
+
+      reviewsRepository.deleteReview.mockResolvedValue();
+
+      const result = await userService.deleteReview(userId, reviewId);
+
+      expect(result).toBeUndefined();
+      expect(reviewsRepository.deleteReview).toHaveBeenCalledWith(reviewId);
     });
   });
 
