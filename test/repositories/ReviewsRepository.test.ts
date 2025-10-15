@@ -299,6 +299,130 @@ describe('ReviewsRepository', () => {
       expect(result.data).toEqual([]);
       expect(result.pagination.total).toBe(0);
     });
+
+    it('should apply sorting by rate in descending order', async () => {
+      const reviewerId = 'reviewer-123';
+      const mockReviewsData = [
+        {
+          id_review: 'review-1',
+          reviewer_id: reviewerId,
+          rate: 5,
+          recommended: true,
+          comments: 'Excellent!',
+          created_at: new Date('2024-01-01'),
+          updated_at: null,
+          instructors_reviews: {
+            id_instructor_review: 'review-1',
+            instructor_id: 'instructor-1',
+          },
+          courses_reviews: null,
+        },
+        {
+          id_review: 'review-2',
+          reviewer_id: reviewerId,
+          rate: 3,
+          recommended: false,
+          comments: 'Average',
+          created_at: new Date('2024-01-02'),
+          updated_at: null,
+          instructors_reviews: null,
+          courses_reviews: {
+            id_course_review: 'review-2',
+            course_id: 'course-1',
+          },
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockReviewsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const leftJoinMock2 = { where: vi.fn().mockReturnValue(whereMock) };
+      const leftJoinMock1 = { leftJoin: vi.fn().mockReturnValue(leftJoinMock2) };
+      const fromMock = { leftJoin: vi.fn().mockReturnValue(leftJoinMock1) };
+
+      drizzleClient.select.mockReturnValue({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const leftJoinCount2 = { where: whereCountMock };
+      const leftJoinCount1 = { leftJoin: vi.fn().mockReturnValue(leftJoinCount2) };
+      const fromCountMock = { leftJoin: vi.fn().mockReturnValue(leftJoinCount1) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await reviewsRepository.getUserReviews(reviewerId, 1, 10, 'rate', 'desc');
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].rate).toBe(5);
+      expect(result.data?.[1].rate).toBe(3);
+    });
+
+    it('should apply sorting by updated_at in ascending order', async () => {
+      const reviewerId = 'reviewer-123';
+      const mockReviewsData = [
+        {
+          id_review: 'review-1',
+          reviewer_id: reviewerId,
+          rate: 4,
+          recommended: true,
+          comments: 'Good',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-10'),
+          instructors_reviews: {
+            id_instructor_review: 'review-1',
+            instructor_id: 'instructor-1',
+          },
+          courses_reviews: null,
+        },
+        {
+          id_review: 'review-2',
+          reviewer_id: reviewerId,
+          rate: 5,
+          recommended: true,
+          comments: 'Great',
+          created_at: new Date('2024-01-02'),
+          updated_at: new Date('2024-01-15'),
+          instructors_reviews: null,
+          courses_reviews: {
+            id_course_review: 'review-2',
+            course_id: 'course-1',
+          },
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockReviewsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const leftJoinMock2 = { where: vi.fn().mockReturnValue(whereMock) };
+      const leftJoinMock1 = { leftJoin: vi.fn().mockReturnValue(leftJoinMock2) };
+      const fromMock = { leftJoin: vi.fn().mockReturnValue(leftJoinMock1) };
+
+      drizzleClient.select.mockReturnValue({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const leftJoinCount2 = { where: whereCountMock };
+      const leftJoinCount1 = { leftJoin: vi.fn().mockReturnValue(leftJoinCount2) };
+      const fromCountMock = { leftJoin: vi.fn().mockReturnValue(leftJoinCount1) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await reviewsRepository.getUserReviews(reviewerId, 1, 10, 'updated_at', 'asc');
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].updatedAt).toEqual(new Date('2024-01-10'));
+      expect(result.data?.[1].updatedAt).toEqual(new Date('2024-01-15'));
+    });
   });
 
   describe('postReview', () => {
@@ -750,6 +874,74 @@ describe('ReviewsRepository', () => {
       expect(result.message).toBe('Instructor reviews retrieved successfully');
       expect(result.pagination.total).toBe(2);
     });
+
+    it('should apply sorting by rate for instructor reviews', async () => {
+      const instructorId = 'instructor-123';
+      const mockReviewsData = [
+        {
+          id_review: 'review-1',
+          reviewer_id: 'reviewer-1',
+          rate: 5,
+          recommended: true,
+          comments: 'Excellent!',
+          created_at: new Date('2024-01-01'),
+          updated_at: null,
+          instructors_reviews: {
+            id_instructor_review: 'review-1',
+            instructor_id: instructorId,
+          },
+          courses_reviews: null,
+        },
+        {
+          id_review: 'review-2',
+          reviewer_id: 'reviewer-2',
+          rate: 2,
+          recommended: false,
+          comments: 'Poor',
+          created_at: new Date('2024-01-03'),
+          updated_at: null,
+          instructors_reviews: {
+            id_instructor_review: 'review-2',
+            instructor_id: instructorId,
+          },
+          courses_reviews: null,
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockReviewsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const leftJoinMock2 = { where: vi.fn().mockReturnValue(whereMock) };
+      const leftJoinMock1 = { leftJoin: vi.fn().mockReturnValue(leftJoinMock2) };
+      const fromMock = { leftJoin: vi.fn().mockReturnValue(leftJoinMock1) };
+
+      drizzleClient.select.mockReturnValue({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const leftJoinCount2 = { where: whereCountMock };
+      const leftJoinCount1 = { leftJoin: vi.fn().mockReturnValue(leftJoinCount2) };
+      const fromCountMock = { leftJoin: vi.fn().mockReturnValue(leftJoinCount1) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await reviewsRepository.getInstructorReviews(
+        instructorId,
+        1,
+        10,
+        'rate',
+        'desc'
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].rate).toBe(5);
+      expect(result.data?.[1].rate).toBe(2);
+    });
   });
 
   describe('getCourseReviews', () => {
@@ -815,6 +1007,68 @@ describe('ReviewsRepository', () => {
       expect(result.data?.[1].reviewedId).toBe(courseId);
       expect(result.message).toBe('Course reviews retrieved successfully');
       expect(result.pagination.total).toBe(2);
+    });
+
+    it('should apply sorting by rate for course reviews', async () => {
+      const courseId = 'course-123';
+      const mockReviewsData = [
+        {
+          id_review: 'review-1',
+          reviewer_id: 'reviewer-1',
+          rate: 5,
+          recommended: true,
+          comments: 'Excellent!',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-02'),
+          instructors_reviews: null,
+          courses_reviews: {
+            id_course_review: 'review-1',
+            course_id: courseId,
+          },
+        },
+        {
+          id_review: 'review-2',
+          reviewer_id: 'reviewer-2',
+          rate: 2,
+          recommended: false,
+          comments: 'Not great',
+          created_at: new Date('2024-01-03'),
+          updated_at: null,
+          instructors_reviews: null,
+          courses_reviews: {
+            id_course_review: 'review-2',
+            course_id: courseId,
+          },
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockReviewsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const leftJoinMock2 = { where: vi.fn().mockReturnValue(whereMock) };
+      const leftJoinMock1 = { leftJoin: vi.fn().mockReturnValue(leftJoinMock2) };
+      const fromMock = { leftJoin: vi.fn().mockReturnValue(leftJoinMock1) };
+
+      drizzleClient.select.mockReturnValue({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const leftJoinCount2 = { where: whereCountMock };
+      const leftJoinCount1 = { leftJoin: vi.fn().mockReturnValue(leftJoinCount2) };
+      const fromCountMock = { leftJoin: vi.fn().mockReturnValue(leftJoinCount1) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await reviewsRepository.getCourseReviews(courseId, 1, 10, 'rate', 'desc');
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].rate).toBe(5);
+      expect(result.data?.[1].rate).toBe(2);
     });
   });
 });

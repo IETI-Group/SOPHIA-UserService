@@ -1,3 +1,4 @@
+import type { AnyColumn } from 'drizzle-orm';
 import { and, asc, count, desc, eq, type SQL } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
 import { linked_accounts, users } from '../../db/schema.js';
@@ -39,7 +40,17 @@ export class LinkedAccountsRepositoryPostgreSQL implements LinkedAccountsReposit
   ): Promise<PaginatedLinkedAccounts> {
     const whereConditions: SQL<unknown>[] = [eq(linked_accounts.user_id, userId)];
 
-    const sortField = sort === 'linked_at' ? linked_accounts.linked_at : linked_accounts.linked_at;
+    let sortField: AnyColumn = linked_accounts.linked_at;
+    if (sort === 'provider') {
+      sortField = linked_accounts.provider;
+    } else if (sort === 'issuer') {
+      sortField = linked_accounts.issuer;
+    } else if (sort === 'email') {
+      sortField = linked_accounts.email;
+    } else if (sort === 'linked_at') {
+      sortField = linked_accounts.linked_at;
+    }
+
     const orderFn = order === 'asc' ? asc : desc;
     const offset = (page - 1) * size;
 
@@ -112,7 +123,7 @@ export class LinkedAccountsRepositoryPostgreSQL implements LinkedAccountsReposit
         external_id: linkedAccountIn.idExternal,
         email: linkedAccountIn.email,
         is_primary: linkedAccountIn.isPrimary,
-        email_verified: false, // Default to false
+        email_verified: false,
       })
       .returning();
 

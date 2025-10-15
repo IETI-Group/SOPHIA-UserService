@@ -152,6 +152,180 @@ describe('Linked Accounts Repository', () => {
       expect(result.data?.[1].provider).toBe('Google');
     });
 
+    it('should apply sorting by issuer in descending order', async () => {
+      const userId = 'user-123';
+      const mockLinkedAccountsData = [
+        {
+          id_linked_account: 'account-1',
+          user_id: userId,
+          provider: 'GitHub',
+          issuer: 'github.com',
+          external_id: 'github-456',
+          email: 'user@github.com',
+          email_verified: false,
+          is_primary: false,
+          linked_at: new Date('2024-01-02'),
+        },
+        {
+          id_linked_account: 'account-2',
+          user_id: userId,
+          provider: 'Google',
+          issuer: 'accounts.google.com',
+          external_id: 'google-123',
+          email: 'user@gmail.com',
+          email_verified: true,
+          is_primary: true,
+          linked_at: new Date('2024-01-01'),
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockLinkedAccountsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const fromCountMock = { where: whereCountMock };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await linkedAccountsRepository.getLinkedAccounts(
+        userId,
+        1,
+        10,
+        'issuer',
+        'desc'
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].issuer).toBe('github.com');
+      expect(result.data?.[1].issuer).toBe('accounts.google.com');
+    });
+
+    it('should apply sorting by email in ascending order', async () => {
+      const userId = 'user-123';
+      const mockLinkedAccountsData = [
+        {
+          id_linked_account: 'account-1',
+          user_id: userId,
+          provider: 'GitHub',
+          issuer: 'github.com',
+          external_id: 'github-456',
+          email: 'alice@github.com',
+          email_verified: false,
+          is_primary: false,
+          linked_at: new Date('2024-01-02'),
+        },
+        {
+          id_linked_account: 'account-2',
+          user_id: userId,
+          provider: 'Google',
+          issuer: 'google.com',
+          external_id: 'google-123',
+          email: 'bob@gmail.com',
+          email_verified: true,
+          is_primary: true,
+          linked_at: new Date('2024-01-01'),
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockLinkedAccountsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const fromCountMock = { where: whereCountMock };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await linkedAccountsRepository.getLinkedAccounts(
+        userId,
+        1,
+        10,
+        'email',
+        'asc'
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].email).toBe('alice@github.com');
+      expect(result.data?.[1].email).toBe('bob@gmail.com');
+    });
+
+    it('should apply sorting by linked_at when specified', async () => {
+      const userId = 'user-123';
+      const mockLinkedAccountsData = [
+        {
+          id_linked_account: 'account-1',
+          user_id: userId,
+          provider: 'Google',
+          issuer: 'google.com',
+          external_id: 'google-123',
+          email: 'user@gmail.com',
+          email_verified: true,
+          is_primary: true,
+          linked_at: new Date('2024-01-01'),
+        },
+        {
+          id_linked_account: 'account-2',
+          user_id: userId,
+          provider: 'GitHub',
+          issuer: 'github.com',
+          external_id: 'github-456',
+          email: 'user@github.com',
+          email_verified: false,
+          is_primary: false,
+          linked_at: new Date('2024-01-02'),
+        },
+      ];
+
+      const offsetMock = vi.fn().mockResolvedValue(mockLinkedAccountsData);
+      const limitMock = { offset: offsetMock };
+      const orderByMock = { limit: vi.fn().mockReturnValue(limitMock) };
+      const whereMock = { orderBy: vi.fn().mockReturnValue(orderByMock) };
+      const fromMock = { where: vi.fn().mockReturnValue(whereMock) };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const whereCountMock = vi.fn().mockResolvedValue([{ count: '2' }]);
+      const fromCountMock = { where: whereCountMock };
+
+      drizzleClient.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue(fromCountMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
+
+      const result = await linkedAccountsRepository.getLinkedAccounts(
+        userId,
+        1,
+        10,
+        'linked_at',
+        'asc'
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0].linkedAt).toEqual(new Date('2024-01-01'));
+      expect(result.data?.[1].linkedAt).toEqual(new Date('2024-01-02'));
+    });
+
     it('should handle pagination correctly', async () => {
       const userId = 'user-123';
       const mockLinkedAccountsData = [

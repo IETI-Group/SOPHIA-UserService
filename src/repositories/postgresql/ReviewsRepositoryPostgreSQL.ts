@@ -1,3 +1,4 @@
+import type { AnyColumn } from 'drizzle-orm';
 import { and, asc, count, desc, eq, isNotNull, or } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
 import { courses_reviews, instructors, instructors_reviews, reviews } from '../../db/schema.js';
@@ -172,7 +173,17 @@ export class ReviewsRepositoryPostgreSQL implements ReviewsRepository {
 
     const total = await this.countReviewsWithConditions(conditions);
 
-    const sortField = sort === 'created_at' ? reviews.created_at : reviews.created_at;
+    let sortField: AnyColumn = reviews.created_at;
+    if (sort === 'rate') {
+      sortField = reviews.rate;
+    } else if (sort === 'updated_at') {
+      sortField = reviews.updated_at;
+    } else if (sort === 'created_at') {
+      sortField = reviews.created_at;
+    } else if (sort === 'recommended') {
+      sortField = reviews.recommended;
+    }
+
     const orderFn = order === 'asc' ? asc : desc;
     const offset = (page - 1) * size;
 
@@ -213,7 +224,16 @@ export class ReviewsRepositoryPostgreSQL implements ReviewsRepository {
 
     const total = await this.countReviewsWithConditions(conditions);
 
-    const sortField = sort === 'created_at' ? reviews.created_at : reviews.created_at;
+    // Map sort parameter to database column
+    let sortField: AnyColumn = reviews.created_at; // Default
+    if (sort === 'rate') {
+      sortField = reviews.rate;
+    } else if (sort === 'updated_at') {
+      sortField = reviews.updated_at;
+    } else if (sort === 'created_at') {
+      sortField = reviews.created_at;
+    }
+
     const orderFn = order === 'asc' ? asc : desc;
     const offset = (page - 1) * size;
 
@@ -254,7 +274,16 @@ export class ReviewsRepositoryPostgreSQL implements ReviewsRepository {
 
     const total = await this.countReviewsWithConditions(conditions);
 
-    const sortField = sort === 'created_at' ? reviews.created_at : reviews.created_at;
+    // Map sort parameter to database column
+    let sortField: AnyColumn = reviews.created_at; // Default
+    if (sort === 'rate') {
+      sortField = reviews.rate;
+    } else if (sort === 'updated_at') {
+      sortField = reviews.updated_at;
+    } else if (sort === 'created_at') {
+      sortField = reviews.created_at;
+    }
+
     const orderFn = order === 'asc' ? asc : desc;
     const offset = (page - 1) * size;
 
