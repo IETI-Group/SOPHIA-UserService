@@ -1,10 +1,13 @@
 import type { LearningPathInDTO, LearningPathOutDTO } from '../models/index.js';
 
 export interface LearningPathsRepository {
-  getUserLearningPath(userId: string): LearningPathOutDTO;
-  postUserLearningPath(userId: string, learningPathInDTO: LearningPathInDTO): LearningPathOutDTO;
+  getUserLearningPath(userId: string): Promise<LearningPathOutDTO>;
+  postUserLearningPath(
+    userId: string,
+    learningPathInDTO: LearningPathInDTO
+  ): Promise<LearningPathOutDTO>;
   updateLearningPath(
     userId: string,
     learningPathUpdateDTO: Partial<LearningPathInDTO>
-  ): LearningPathOutDTO;
+  ): Promise<LearningPathOutDTO>;
 }

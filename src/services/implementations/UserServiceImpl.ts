@@ -80,7 +80,7 @@ export default class UserServiceImpl implements UserService {
     _order: 'asc' | 'desc',
     _showInstructors?: boolean,
     _showCourses?: boolean,
-    _eviewedId?: string
+    _reviewedId?: string
   ): Promise<PaginatedReviews> {
     throw new Error('Method not implemented.');
   }
