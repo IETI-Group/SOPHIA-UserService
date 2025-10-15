@@ -118,6 +118,32 @@ export default class UserController {
     );
     return response;
   }
+  public async getInstructorReviews(
+    instructorId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
+  ): Promise<PaginatedReviews> {
+    const response = await this.userService.getInstructorReviews(
+      instructorId,
+      page,
+      size,
+      sort,
+      order
+    );
+    return response;
+  }
+  public async getCourseReviews(
+    courseId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
+  ): Promise<PaginatedReviews> {
+    const response = await this.userService.getCourseReviews(courseId, page, size, sort, order);
+    return response;
+  }
   public async postReview(reviewIn: ReviewInDTO): Promise<ApiResponse<ReviewOutDTO>> {
     const response = await this.userService.postReview(reviewIn);
     return parseApiResponse(response);

@@ -10,8 +10,22 @@ export interface ReviewsRepository {
     showInstructors?: boolean,
     showCourses?: boolean,
     reviewedId?: string
-  ): PaginatedReviews;
-  postReview(reviewIn: ReviewInDTO): ReviewOutDTO;
-  updateReview(reviewId: string, reviewInstructor: Partial<ReviewInDTO>): ReviewOutDTO;
-  deleteReview(reviewId: string): void;
+  ): Promise<PaginatedReviews>;
+  getInstructorReviews(
+    instructorId: string,
+    page: number,
+    size: number,
+    sort?: string,
+    order?: string
+  ): Promise<PaginatedReviews>;
+  getCourseReviews(
+    courseId: string,
+    page: number,
+    size: number,
+    sort?: string,
+    order?: string
+  ): Promise<PaginatedReviews>;
+  postReview(reviewIn: ReviewInDTO): Promise<ReviewOutDTO>;
+  updateReview(reviewId: string, reviewInstructor: Partial<ReviewInDTO>): Promise<ReviewOutDTO>;
+  deleteReview(reviewId: string): Promise<void>;
 }

@@ -53,6 +53,20 @@ export default interface UserService {
     showCourses?: boolean,
     reviewedUserId?: string
   ): Promise<PaginatedReviews>;
+  getInstructorReviews(
+    instructorId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
+  ): Promise<PaginatedReviews>;
+  getCourseReviews(
+    courseId: string,
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc'
+  ): Promise<PaginatedReviews>;
   postReview(reviewIn: ReviewInDTO): Promise<ReviewOutDTO>;
   updateReview(
     userId: string,
