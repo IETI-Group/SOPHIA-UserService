@@ -13,8 +13,7 @@
     "removeComments": false,
     "noImplicitAny": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": "."
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/*", "src/**/*", "test/**/*", "test"],
   "exclude": ["node_modules", "dist", "docs", "coverage"]

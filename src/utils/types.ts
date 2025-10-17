@@ -1,40 +1,18 @@
-// Respuesta estándar de la API
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-  timestamp: string;
-}
+/**
+ * Re-export types and enums from schema.ts for backward compatibility
+ * All database-related types are now defined in schema.ts to avoid
+ * circular dependencies and TypeScript ESM module issues with drizzle-kit
+ */
+export {
+  LEARNING_STYLES,
+  PACE_PREFERENCE,
+  REVIEW_DISCRIMINANT,
+  ROLE,
+  ROLE_STATUS,
+  type ValidUserSortFields,
+  VERIFICATION_STATUS,
+} from '../db/schema.js';
 
-// Respuesta de error de la API
-export interface ApiErrorResponse {
-  success: false;
-  error: string;
-  timestamp: string;
-  stack?: string;
-}
-
-// Respuesta paginada
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
-}
-
-// Query parameters para paginación
-export interface PaginationQuery {
-  page?: number;
-  limit?: number;
-  sort?: string;
-  order?: "asc" | "desc";
-}
-
-// Información de salud del servicio
 export interface HealthInfo {
   success: boolean;
   message: string;
