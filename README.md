@@ -51,8 +51,6 @@ SOPHIA User Service es un microservicio backend diseñado para gestionar usuario
 2. **Instalar dependencias:**
    ```bash
    pnpm install
-   # o usando npm
-   npm install
    ```
 
 3. **Configurar variables de entorno:**

@@ -165,3 +165,68 @@ export const linkedAccountInDTO = (optional = false): ValidationChain[] => {
     body('isPrimary').isBoolean().withMessage('isPrimary is required and must be a boolean value'),
   ].map((validation) => (optional ? validation.optional() : validation));
 };
+
+// ============================================
+// ADMIN VALIDATORS
+// ============================================
+
+export const roleInDTO = (optional = false): ValidationChain[] => {
+  return [
+    body('name')
+      .isString()
+      .notEmpty()
+      .isIn(['admin', 'instructor', 'student', 'guest'])
+      .withMessage('Role name must be one of: admin, instructor, student, guest'),
+    body('description').isString().optional().withMessage('Description must be a string'),
+  ].map((validation) => (optional ? validation.optional() : validation));
+};
+
+export const roleAssignationInDTO = (optional = false): ValidationChain[] => {
+  return [
+    body('userId').isString().notEmpty().withMessage('User ID is required and must be a string'),
+    body('role')
+      .isString()
+      .notEmpty()
+      .isIn(['admin', 'instructor', 'student', 'guest'])
+      .withMessage('Role must be one of: admin, instructor, student, guest'),
+    body('status')
+      .optional()
+      .isIn(['active', 'inactive', 'suspended'])
+      .withMessage('Status must be one of: active, inactive, suspended'),
+    body('expiresAt')
+      .optional()
+      .isISO8601()
+      .toDate()
+      .withMessage('Expires at must be a valid date in ISO 8601 format'),
+  ].map((validation) => (optional ? validation.optional() : validation));
+};
+
+export const instructorInDTO = (optional = false): ValidationChain[] => {
+  return [
+    body('instructorId')
+      .isString()
+      .notEmpty()
+      .withMessage('Instructor ID is required and must be a string'),
+    body('verificationStatus')
+      .optional()
+      .isIn(['verified', 'pending', 'rejected'])
+      .withMessage('Verification status must be one of: verified, pending, rejected'),
+    body('verifiedAt')
+      .optional()
+      .isISO8601()
+      .toDate()
+      .withMessage('Verified at must be a valid date in ISO 8601 format'),
+  ].map((validation) => (optional ? validation.optional() : validation));
+};
+
+export const enumQuery = (
+  queryName: string,
+  message: string,
+  values: string[],
+  optional = false
+): ValidationChain => {
+  return query(queryName)
+    .isIn(values)
+    .withMessage(`${message}. Must be one of: ${values.join(', ')}`)
+    .optional(optional);
+};
