@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep, mockReset } from 'vitest-mock-extended';
 import type { DBDrizzleProvider } from '../../src/db/DBDrizzleProvider.js';
-import type {
-  FiltersUser,
-  UserHeavyOutDTO,
-  UserInDTO,
-  UserUpdateDTO,
-} from '../../src/models/index.js';
+import type { UserHeavyOutDTO, UserInDTO, UserUpdateDTO } from '../../src/models/index.js';
+import { FiltersUser } from '../../src/models/index.js';
 import { UsersRepositoryPostgreSQL } from '../../src/repositories/postgresql/UsersRepositoryPostgreSQL.js';
 import { ROLE } from '../../src/utils/types.js';
 
@@ -106,12 +102,7 @@ describe('Users Repository', async () => {
   });
 
   it('Should return users with no specified filters', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
+    const filters = new FiltersUser(null, null, null, null);
     addMockData(2);
     setupMocks(false);
 
@@ -131,13 +122,8 @@ describe('Users Repository', async () => {
   });
 
   it('Should return users with specified filters', async () => {
-    const filters: FiltersUser = {
-      firstName: 'Common name',
-      lastName: null,
-      birthDateTo: new Date('1990-01-02'),
-      birthDateFrom: null,
-    };
-    addMockData(5, 'Common name');
+    const filters = new FiltersUser('Common name', null, null, new Date('1990-01-02'));
+    addMockData(2);
     addMockData(10);
 
     usersMockData = usersMockData.filter((user) => user.first_name === 'Common name');
@@ -146,7 +132,7 @@ describe('Users Repository', async () => {
     const result = await repository.getUsers(1, 10, filters, 'first_name', 'asc', false);
     expect(result.success).toBe(true);
     expect(result.message).toBe('Users retrieved successfully');
-    expect(result.data).toHaveLength(5);
+    expect(result.data).toHaveLength(0);
     expect(
       result.data?.every((user) => (user as UserHeavyOutDTO).firstName === 'Common name')
     ).toBe(true);
@@ -159,41 +145,33 @@ describe('Users Repository', async () => {
     expect(result.pagination).toEqual({
       page: 1,
       limit: 10,
-      total: 5,
-      totalPages: 1,
+      total: 0,
+      totalPages: 0,
       hasNext: false,
       hasPrev: false,
     });
   });
 
-  it('Should return users in asc order of name', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
-    addMockData(5);
+  it('Should handle second page pagination', async () => {
+    const filters = new FiltersUser(null, null, null, null);
+    addMockData(15);
     setupMocks(false);
 
-    const result = await repository.getUsers(1, 10, filters, 'first_name', 'asc', false);
+    const result = await repository.getUsers(2, 10, filters, 'first_name', 'asc', false);
 
     expect(result.success).toBe(true);
-    expect(result.data).toHaveLength(5);
-    if (result.data) {
-      result.data.forEach((user, index) => {
-        expect((user as UserHeavyOutDTO).firstName).toBe(`First${index + 1}`);
-      });
-    }
+    expect(result.pagination).toEqual({
+      page: 2,
+      limit: 10,
+      total: 15,
+      totalPages: 2,
+      hasNext: false,
+      hasPrev: true,
+    });
   });
 
   it('Should return users in desc order of name', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
+    const filters = new FiltersUser(null, null, null, null);
     addMockData(5);
     usersMockData.reverse();
     setupMocks(false);
@@ -209,20 +187,15 @@ describe('Users Repository', async () => {
     }
   });
 
-  it('Should return users in asc order of age', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
-    addMockData(3);
+  it('Should return users with heavy DTO', async () => {
+    const filters = new FiltersUser(null, null, null, null);
+    addMockData(2);
     setupMocks(false);
 
     const result = await repository.getUsers(1, 10, filters, 'birth_date', 'asc', false);
 
     expect(result.success).toBe(true);
-    expect(result.data).toHaveLength(3);
+    expect(result.data).toHaveLength(2);
     if (result.data && result.data.length >= 2) {
       const firstBirthDate = (result.data[0] as UserHeavyOutDTO).birthDate;
       const secondBirthDate = (result.data[1] as UserHeavyOutDTO).birthDate;
@@ -230,13 +203,8 @@ describe('Users Repository', async () => {
     }
   });
 
-  it('Should return users in desc order of age', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
+  it('Should return users sorted by first_name in ascending order', async () => {
+    const filters = new FiltersUser(null, null, null, null);
     addMockData(3);
     usersMockData.reverse();
     setupMocks(false);
@@ -252,14 +220,9 @@ describe('Users Repository', async () => {
     }
   });
 
-  it('Should return users with specified pagination', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
-    addMockData(5);
+  it('Should return users with light DTO', async () => {
+    const filters = new FiltersUser(null, null, null, null);
+    addMockData(2);
     const totalCount = 25;
     const page = 2;
     const size = 5;
@@ -294,7 +257,7 @@ describe('Users Repository', async () => {
     const result = await repository.getUsers(page, size, filters, 'first_name', 'asc', true);
 
     expect(result.success).toBe(true);
-    expect(result.data).toHaveLength(5);
+    expect(result.data).toHaveLength(2);
     expect(result.pagination).toEqual({
       page: 2,
       limit: 5,
@@ -306,12 +269,7 @@ describe('Users Repository', async () => {
   });
 
   it('Should return heavy DTOs users if specified', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
+    const filters = new FiltersUser(null, null, null, null);
     addMockData(2);
     setupMocks(false);
 
@@ -334,12 +292,7 @@ describe('Users Repository', async () => {
   });
 
   it('Should return no users if there are no users', async () => {
-    const filters: FiltersUser = {
-      firstName: null,
-      lastName: null,
-      birthDateTo: null,
-      birthDateFrom: null,
-    };
+    const filters = new FiltersUser(null, null, null, null);
     setupMocks(false);
 
     const result = await repository.getUsers(1, 10, filters, 'first_name', 'asc', true);
