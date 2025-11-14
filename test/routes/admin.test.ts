@@ -103,22 +103,18 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/admin/roles')
-        .send({
-          name: ROLE.STUDENT,
-          description: 'Student role',
-        });
+      const response = await request(app).post('/api/v1/admin/roles').send({
+        name: ROLE.STUDENT,
+        description: 'Student role',
+      });
 
       expect(response.status).toBe(201);
     });
 
     it('should reject missing role name', async () => {
-      const response = await request(app)
-        .post('/api/v1/admin/roles')
-        .send({
-          description: 'Role without name',
-        });
+      const response = await request(app).post('/api/v1/admin/roles').send({
+        description: 'Role without name',
+      });
 
       expect(response.status).toBe(400);
     });
@@ -135,11 +131,9 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/admin/roles')
-        .send({
-          name: ROLE.INSTRUCTOR,
-        });
+      const response = await request(app).post('/api/v1/admin/roles').send({
+        name: ROLE.INSTRUCTOR,
+      });
 
       expect(response.status).toBe(201);
     });
@@ -158,11 +152,9 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .put(`/api/v1/admin/roles/${ROLE.ADMIN}`)
-        .send({
-          description: 'Updated description',
-        });
+      const response = await request(app).put(`/api/v1/admin/roles/${ROLE.ADMIN}`).send({
+        description: 'Updated description',
+      });
 
       expect(response.status).toBe(200);
     });
@@ -222,22 +214,18 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/admin/assignations')
-        .send({
-          userId: 'user123',
-          role: ROLE.INSTRUCTOR,
-        });
+      const response = await request(app).post('/api/v1/admin/assignations').send({
+        userId: 'user123',
+        role: ROLE.INSTRUCTOR,
+      });
 
       expect(response.status).toBe(201);
     });
 
     it('should reject missing userId', async () => {
-      const response = await request(app)
-        .post('/api/v1/admin/assignations')
-        .send({
-          role: ROLE.INSTRUCTOR,
-        });
+      const response = await request(app).post('/api/v1/admin/assignations').send({
+        role: ROLE.INSTRUCTOR,
+      });
 
       expect(response.status).toBe(400);
     });
@@ -288,11 +276,9 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .put('/api/v1/admin/assignations/assignation123')
-        .send({
-          status: ROLE_STATUS.INACTIVE,
-        });
+      const response = await request(app).put('/api/v1/admin/assignations/assignation123').send({
+        status: ROLE_STATUS.INACTIVE,
+      });
 
       expect(response.status).toBe(200);
     });
@@ -306,8 +292,9 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .delete(`/api/v1/admin/assignations/user/user123/role/${ROLE.INSTRUCTOR}`);
+      const response = await request(app).delete(
+        `/api/v1/admin/assignations/user/user123/role/${ROLE.INSTRUCTOR}`
+      );
 
       expect(response.status).toBe(200);
     });
@@ -365,33 +352,27 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/admin/instructors')
-        .send({
-          instructorId: 'user123',
-          verificationStatus: 'pending',
-        });
+      const response = await request(app).post('/api/v1/admin/instructors').send({
+        instructorId: 'user123',
+        verificationStatus: 'pending',
+      });
 
       expect(response.status).toBe(201);
     });
 
     it('should reject missing instructor ID', async () => {
-      const response = await request(app)
-        .post('/api/v1/admin/instructors')
-        .send({
-          verificationStatus: 'pending',
-        });
+      const response = await request(app).post('/api/v1/admin/instructors').send({
+        verificationStatus: 'pending',
+      });
 
       expect(response.status).toBe(400);
     });
 
     it('should reject invalid verification status', async () => {
-      const response = await request(app)
-        .post('/api/v1/admin/instructors')
-        .send({
-          instructorId: 'user123',
-          verificationStatus: 'INVALID_STATUS',
-        });
+      const response = await request(app).post('/api/v1/admin/instructors').send({
+        instructorId: 'user123',
+        verificationStatus: 'INVALID_STATUS',
+      });
 
       expect(response.status).toBe(400);
     });
@@ -404,13 +385,11 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/admin/instructors')
-        .send({
-          instructorId: 'user456',
-          verificationStatus: 'verified',
-          verifiedAt: '2024-01-15',
-        });
+      const response = await request(app).post('/api/v1/admin/instructors').send({
+        instructorId: 'user456',
+        verificationStatus: 'verified',
+        verifiedAt: '2024-01-15',
+      });
 
       expect(response.status).toBe(201);
     });
@@ -433,22 +412,18 @@ describe('Admin Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .put('/api/v1/admin/instructors/instructor123')
-        .send({
-          verificationStatus: 'verified',
-          verifiedAt: '2024-01-15',
-        });
+      const response = await request(app).put('/api/v1/admin/instructors/instructor123').send({
+        verificationStatus: 'verified',
+        verifiedAt: '2024-01-15',
+      });
 
       expect(response.status).toBe(200);
     });
 
     it('should reject invalid verification status', async () => {
-      const response = await request(app)
-        .put('/api/v1/admin/instructors/instructor123')
-        .send({
-          verificationStatus: 'INVALID',
-        });
+      const response = await request(app).put('/api/v1/admin/instructors/instructor123').send({
+        verificationStatus: 'INVALID',
+      });
 
       expect(response.status).toBe(400);
     });

@@ -3,6 +3,7 @@ import { mockDeep, mockReset } from 'vitest-mock-extended';
 import type { DBDrizzleProvider } from '../../../src/db/DBDrizzleProvider.js';
 import { VERIFICATION_STATUS } from '../../../src/db/schema.js';
 import { FiltersInstructor } from '../../../src/models/index.js';
+import type { InstructorInput } from '../../../src/repositories/InstructorsRepository.js';
 import { InstructorsRepositoryPostgreSQL } from '../../../src/repositories/postgresql/InstructorsRepositoryPostgreSQL.js';
 
 describe('InstructorsRepositoryPostgreSQL tests', () => {
@@ -111,13 +112,7 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
           from: vi.fn().mockReturnValue(countFromMock),
         } as unknown as ReturnType<typeof drizzleClient.select>);
 
-      const filters = new FiltersInstructor(
-        VERIFICATION_STATUS.VERIFIED,
-        50,
-        100,
-        5,
-        4.5
-      );
+      const filters = new FiltersInstructor(VERIFICATION_STATUS.VERIFIED, 50, 100, 5, 4.5);
       const result = await repository.getInstructors(1, 10, filters);
 
       expect(result.success).toBe(true);
@@ -396,9 +391,7 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       };
 
       const valuesMock = {
-        returning: vi
-          .fn()
-          .mockRejectedValue(new Error('foreign key constraint violation')),
+        returning: vi.fn().mockRejectedValue(new Error('foreign key constraint violation')),
       };
 
       drizzleClient.insert.mockReturnValue({
@@ -480,7 +473,7 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
 
     it('should throw error for invalid fields', async () => {
       await expect(
-        repository.updateInstructor('instructor1', { invalid: 'field' } as any)
+        repository.updateInstructor('instructor1', { invalid: 'field' } as Partial<InstructorInput>)
       ).rejects.toThrow('Invalid fields provided: invalid');
     });
 

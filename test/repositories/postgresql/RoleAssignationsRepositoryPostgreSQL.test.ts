@@ -4,6 +4,7 @@ import type { DBDrizzleProvider } from '../../../src/db/DBDrizzleProvider.js';
 import { ROLE, ROLE_STATUS } from '../../../src/db/schema.js';
 import { FiltersRoleAssignation } from '../../../src/models/index.js';
 import { RoleAssignationsRepositoryPostgreSQL } from '../../../src/repositories/postgresql/RoleAssignationsRepositoryPostgreSQL.js';
+import type { RoleAssignationInput } from '../../../src/repositories/RoleAssignationsRepository.js';
 
 describe('RoleAssignationsRepositoryPostgreSQL tests', () => {
   const drizzleClient = mockDeep<DBDrizzleProvider>();
@@ -587,7 +588,9 @@ describe('RoleAssignationsRepositoryPostgreSQL tests', () => {
 
     it('should throw error for invalid fields', async () => {
       await expect(
-        repository.updateAssignationById('assignation1', { invalid: 'field' } as any)
+        repository.updateAssignationById('assignation1', {
+          invalid: 'field',
+        } as Partial<RoleAssignationInput>)
       ).rejects.toThrow('Invalid fields provided: invalid');
     });
   });
@@ -632,9 +635,7 @@ describe('RoleAssignationsRepositoryPostgreSQL tests', () => {
         where: vi.fn().mockReturnValue(deleteWhereMock),
       } as unknown as ReturnType<typeof drizzleClient.delete>);
 
-      await expect(
-        repository.deleteAssignationByUserAndRole(userId, role)
-      ).resolves.not.toThrow();
+      await expect(repository.deleteAssignationByUserAndRole(userId, role)).resolves.not.toThrow();
     });
 
     it('should throw error when assignation not found', async () => {

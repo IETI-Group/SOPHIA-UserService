@@ -85,33 +85,27 @@ describe('Instructors Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/instructors')
-        .send({
-          instructorId: 'user123',
-          verificationStatus: 'pending',
-        });
+      const response = await request(app).post('/api/v1/instructors').send({
+        instructorId: 'user123',
+        verificationStatus: 'pending',
+      });
 
       expect(response.status).toBe(201);
     });
 
     it('should reject missing instructor ID', async () => {
-      const response = await request(app)
-        .post('/api/v1/instructors')
-        .send({
-          verificationStatus: 'pending',
-        });
+      const response = await request(app).post('/api/v1/instructors').send({
+        verificationStatus: 'pending',
+      });
 
       expect(response.status).toBe(400);
     });
 
     it('should reject invalid verification status', async () => {
-      const response = await request(app)
-        .post('/api/v1/instructors')
-        .send({
-          instructorId: 'user123',
-          verificationStatus: 'INVALID_STATUS',
-        });
+      const response = await request(app).post('/api/v1/instructors').send({
+        instructorId: 'user123',
+        verificationStatus: 'INVALID_STATUS',
+      });
 
       expect(response.status).toBe(400);
     });
@@ -132,11 +126,9 @@ describe('Instructors Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/instructors')
-        .send({
-          instructorId: 'user456',
-        });
+      const response = await request(app).post('/api/v1/instructors').send({
+        instructorId: 'user456',
+      });
 
       expect(response.status).toBe(201);
     });
@@ -157,25 +149,21 @@ describe('Instructors Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .post('/api/v1/instructors')
-        .send({
-          instructorId: 'user789',
-          verificationStatus: 'verified',
-          verifiedAt: '2024-01-15',
-        });
+      const response = await request(app).post('/api/v1/instructors').send({
+        instructorId: 'user789',
+        verificationStatus: 'verified',
+        verifiedAt: '2024-01-15',
+      });
 
       expect(response.status).toBe(201);
     });
 
     it('should reject invalid date format', async () => {
-      const response = await request(app)
-        .post('/api/v1/instructors')
-        .send({
-          instructorId: 'user123',
-          verificationStatus: 'verified',
-          verifiedAt: 'invalid-date',
-        });
+      const response = await request(app).post('/api/v1/instructors').send({
+        instructorId: 'user123',
+        verificationStatus: 'verified',
+        verifiedAt: 'invalid-date',
+      });
 
       expect(response.status).toBe(400);
     });
@@ -198,12 +186,10 @@ describe('Instructors Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .put('/api/v1/instructors/instructor123')
-        .send({
-          verificationStatus: 'verified',
-          verifiedAt: '2024-01-15',
-        });
+      const response = await request(app).put('/api/v1/instructors/instructor123').send({
+        verificationStatus: 'verified',
+        verifiedAt: '2024-01-15',
+      });
 
       expect(response.status).toBe(200);
     });
@@ -224,41 +210,33 @@ describe('Instructors Routes Validation Tests', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await request(app)
-        .put('/api/v1/instructors/instructor123')
-        .send({
-          verificationStatus: 'rejected',
-        });
+      const response = await request(app).put('/api/v1/instructors/instructor123').send({
+        verificationStatus: 'rejected',
+      });
 
       expect(response.status).toBe(200);
     });
 
     it('should reject invalid verification status', async () => {
-      const response = await request(app)
-        .put('/api/v1/instructors/instructor123')
-        .send({
-          verificationStatus: 'INVALID_STATUS',
-        });
+      const response = await request(app).put('/api/v1/instructors/instructor123').send({
+        verificationStatus: 'INVALID_STATUS',
+      });
 
       expect(response.status).toBe(400);
     });
 
     it('should reject invalid date format', async () => {
-      const response = await request(app)
-        .put('/api/v1/instructors/instructor123')
-        .send({
-          verifiedAt: 'invalid-date',
-        });
+      const response = await request(app).put('/api/v1/instructors/instructor123').send({
+        verifiedAt: 'invalid-date',
+      });
 
       expect(response.status).toBe(400);
     });
 
     it('should reject empty instructor ID', async () => {
-      const response = await request(app)
-        .put('/api/v1/instructors/')
-        .send({
-          verificationStatus: 'verified',
-        });
+      const response = await request(app).put('/api/v1/instructors/').send({
+        verificationStatus: 'verified',
+      });
 
       expect(response.status).toBe(404);
     });

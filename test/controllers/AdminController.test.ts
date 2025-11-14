@@ -3,7 +3,6 @@ import { mockDeep, mockReset } from 'vitest-mock-extended';
 import type { Logger } from 'winston';
 import AdminController from '../../src/controllers/AdminController.js';
 import { ROLE, ROLE_STATUS, VERIFICATION_STATUS } from '../../src/db/schema.js';
-import { FiltersInstructor, FiltersRoleAssignation } from '../../src/models/index.js';
 import type {
   InstructorInput,
   InstructorRecord,

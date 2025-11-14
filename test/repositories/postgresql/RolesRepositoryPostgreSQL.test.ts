@@ -3,6 +3,7 @@ import { mockDeep, mockReset } from 'vitest-mock-extended';
 import type { DBDrizzleProvider } from '../../../src/db/DBDrizzleProvider.js';
 import { ROLE } from '../../../src/db/schema.js';
 import { RolesRepositoryPostgreSQL } from '../../../src/repositories/postgresql/RolesRepositoryPostgreSQL.js';
+import type { RoleInput } from '../../../src/repositories/RolesRepository.js';
 
 describe('RolesRepositoryPostgreSQL tests', () => {
   const drizzleClient = mockDeep<DBDrizzleProvider>();
@@ -349,7 +350,7 @@ describe('RolesRepositoryPostgreSQL tests', () => {
 
     it('should throw error for invalid fields', async () => {
       await expect(
-        repository.updateRole(ROLE.ADMIN, { invalidField: 'value' } as any)
+        repository.updateRole(ROLE.ADMIN, { invalidField: 'value' } as Partial<RoleInput>)
       ).rejects.toThrow('Invalid fields provided: invalidField');
     });
 

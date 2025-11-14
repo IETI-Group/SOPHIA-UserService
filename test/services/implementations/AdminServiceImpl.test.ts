@@ -304,7 +304,14 @@ describe('AdminServiceImpl tests', () => {
       const size = 10;
       const sort = 'average_rating';
       const order = 'desc';
-      const filters = new FiltersInstructor(VERIFICATION_STATUS.VERIFIED, null, null, null, null, false);
+      const filters = new FiltersInstructor(
+        VERIFICATION_STATUS.VERIFIED,
+        null,
+        null,
+        null,
+        null,
+        false
+      );
       const mockResponse = {
         success: true,
         message: 'Instructors retrieved successfully',
