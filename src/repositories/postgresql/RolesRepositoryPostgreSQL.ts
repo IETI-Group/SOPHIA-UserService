@@ -76,7 +76,7 @@ export class RolesRepositoryPostgreSQL implements RolesRepository {
     const validRoles: ROLE[] = [ROLE.ADMIN, ROLE.INSTRUCTOR, ROLE.STUDENT];
     if (!validRoles.includes(role.name)) {
       throw new Error(
-        `Invalid role name: ${role.name}. Only ${validRoles.join(', ')} are allowed.`
+        `Role name '${role.name}' is not a valid value. Allowed values are: ${validRoles.join(', ')}.`
       );
     }
 
