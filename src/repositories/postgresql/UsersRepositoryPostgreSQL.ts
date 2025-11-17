@@ -27,17 +27,22 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
 
   private validateFilters(filters: FiltersUser): SQL<unknown>[] {
     const whereConditions: SQL<unknown>[] = [];
-    if (filters.firstName) {
-      whereConditions.push(ilike(users.first_name, `%${filters.firstName}%`));
+    const firstName = filters.getFirstName();
+    const lastName = filters.getLastName();
+    const birthDateFrom = filters.getBirthDateFrom();
+    const birthDateTo = filters.getBirthDateTo();
+
+    if (firstName) {
+      whereConditions.push(ilike(users.first_name, `%${firstName}%`));
     }
-    if (filters.lastName) {
-      whereConditions.push(ilike(users.last_name, `%${filters.lastName}%`));
+    if (lastName) {
+      whereConditions.push(ilike(users.last_name, `%${lastName}%`));
     }
-    if (filters.birthDateFrom) {
-      whereConditions.push(gte(users.birth_date, filters.birthDateFrom));
+    if (birthDateFrom) {
+      whereConditions.push(gte(users.birth_date, birthDateFrom));
     }
-    if (filters.birthDateTo) {
-      whereConditions.push(lte(users.birth_date, filters.birthDateTo));
+    if (birthDateTo) {
+      whereConditions.push(lte(users.birth_date, birthDateTo));
     }
     return whereConditions;
   }

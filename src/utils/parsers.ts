@@ -159,3 +159,76 @@ export const parseReviewUpdateInDTO = (req: Request): Partial<ReviewInDTO> => {
   const recommended = req.body.recommended as boolean | undefined;
   return { rate, comments, discriminant, recommended };
 };
+
+// ============================================
+// ADMIN PARSERS
+// ============================================
+
+export const parseRoleInBody = (req: Request) => {
+  return {
+    name: req.body.name,
+    description: req.body.description,
+  };
+};
+
+export const parseRoleUpdateInBody = (req: Request) => {
+  return {
+    name: req.body.name,
+    description: req.body.description,
+  };
+};
+
+export const parseRoleAssignationInBody = (req: Request) => {
+  return {
+    userId: req.body.userId,
+    role: req.body.role,
+  };
+};
+
+export const parseRoleAssignationUpdateInBody = (req: Request) => {
+  return {
+    status: req.body.status,
+    expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
+  };
+};
+
+export const parseRoleAssignationsQuery = (req: Request) => {
+  const assignmentStartDate = req.query.assignmentStartDate
+    ? new Date(req.query.assignmentStartDate as string)
+    : undefined;
+  const assignmentEndDate = req.query.assignmentEndDate
+    ? new Date(req.query.assignmentEndDate as string)
+    : undefined;
+  const expirationStartDate = req.query.expirationStartDate
+    ? new Date(req.query.expirationStartDate as string)
+    : undefined;
+  const expirationEndDate = req.query.expirationEndDate
+    ? new Date(req.query.expirationEndDate as string)
+    : undefined;
+  const roleStatus = req.query.role_status as string | undefined;
+  const role = req.query.role as string | undefined;
+
+  return {
+    assignmentStartDate,
+    assignmentEndDate,
+    expirationStartDate,
+    expirationEndDate,
+    roleStatus,
+    role,
+  };
+};
+
+export const parseInstructorInBody = (req: Request) => {
+  return {
+    instructorId: req.body.instructorId,
+    verificationStatus: req.body.verificationStatus,
+    verifiedAt: req.body.verifiedAt ? new Date(req.body.verifiedAt) : undefined,
+  };
+};
+
+export const parseInstructorUpdateInBody = (req: Request) => {
+  return {
+    verificationStatus: req.body.verificationStatus,
+    verifiedAt: req.body.verifiedAt ? new Date(req.body.verifiedAt) : undefined,
+  };
+};

@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { mockDeep, mockReset } from 'vitest-mock-extended';
-import type {
+import {
   FiltersUser,
-  LearningPathInDTO,
-  LinkedAccountInDTO,
-  ReviewInDTO,
-  UserInDTO,
-  UserUpdateDTO,
+  type LearningPathInDTO,
+  type LinkedAccountInDTO,
+  type ReviewInDTO,
+  type UserInDTO,
+  type UserUpdateDTO,
 } from '../../../src/models/index.js';
 import type {
   LearningPathsRepository,
@@ -48,12 +48,7 @@ describe('User Service Implementation', () => {
       const sort = 'first_name';
       const order = 'asc' as 'asc' | 'desc';
       const lightDTO = true;
-      const filters: FiltersUser = {
-        firstName: null,
-        lastName: null,
-        birthDateFrom: null,
-        birthDateTo: null,
-      };
+      const filters = new FiltersUser(null, null, null, null);
 
       const mockResponse = {
         success: true,
@@ -91,12 +86,7 @@ describe('User Service Implementation', () => {
       const size = 10;
       const sort = 'first_name';
       const order = 'desc' as 'asc' | 'desc';
-      const filters: FiltersUser = {
-        firstName: null,
-        lastName: null,
-        birthDateFrom: null,
-        birthDateTo: null,
-      };
+      const filters = new FiltersUser(null, null, null, null);
 
       const mockResponse = {
         success: true,
