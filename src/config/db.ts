@@ -7,11 +7,7 @@ import envConfig from './env.config.js';
  * PostgreSQL connections pool
  */
 export const pool = new Pool({
-  host: envConfig.database.host,
-  port: envConfig.database.port,
-  user: envConfig.database.user,
-  password: envConfig.database.password,
-  database: envConfig.database.name,
+  connectionString: envConfig.database.url,
   ssl: envConfig.database.ssl,
   max: 20, // Max connections
   idleTimeoutMillis: 30000,
