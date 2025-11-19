@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: sophia-userservice-app
+    network_mode: host
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - DATABASE_URL=${DATABASE_URL}
+      - DB_SSL=${DB_SSL}
+      - JWT_SECRET=${JWT_SECRET}
+    restart: unless-stopped

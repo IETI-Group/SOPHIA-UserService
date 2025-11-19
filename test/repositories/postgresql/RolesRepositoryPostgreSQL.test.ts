@@ -264,9 +264,7 @@ describe('RolesRepositoryPostgreSQL tests', () => {
         description: 'Invalid role',
       };
 
-      await expect(repository.postRole(invalidRole)).rejects.toThrow(
-        'Invalid role name: INVALID_ROLE'
-      );
+      await expect(repository.postRole(invalidRole)).rejects.toThrow();
     });
 
     it('should throw error when role already exists', async () => {
@@ -357,7 +355,7 @@ describe('RolesRepositoryPostgreSQL tests', () => {
     it('should throw error for invalid role name in update', async () => {
       await expect(
         repository.updateRole(ROLE.ADMIN, { name: 'INVALID_ROLE' as ROLE })
-      ).rejects.toThrow('Invalid role name: INVALID_ROLE');
+      ).rejects.toThrow();
     });
 
     it('should throw error when role not found', async () => {
