@@ -1,11 +1,3 @@
-/**
- * Basic Drizzle configuration file.
- * 
- * This file uses environment variables directly instead of importing
- * from TypeScript modules to avoid ESM module resolution issues with drizzle-kit.
- * 
- * Make sure to load .env file before running drizzle-kit commands.
- */
 import { defineConfig } from 'drizzle-kit';
 
 if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === '') {

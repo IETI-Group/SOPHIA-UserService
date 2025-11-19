@@ -4,12 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
-      args:
-        - DATABASE_URL=${DATABASE_URL}
-        - DB_SSL=${DB_SSL}
     container_name: sophia-userservice-app
-    ports:
-      - ${PORT}:80
+    network_mode: host
     environment:
       - NODE_ENV=${NODE_ENV}
       - PORT=${PORT}
@@ -17,9 +13,3 @@ services:
       - DB_SSL=${DB_SSL}
       - JWT_SECRET=${JWT_SECRET}
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
