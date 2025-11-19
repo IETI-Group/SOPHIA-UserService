@@ -31,9 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-    
-      - name: Generate Drizzle Client
-        run: pnpm db:generate
 
       - name: Run test
         run: pnpm test:run
