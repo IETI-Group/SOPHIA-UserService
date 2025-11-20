@@ -15,6 +15,7 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "coverage": "vitest --coverage",
+    "coverage:run": "vitest --coverage --run",
     "doc": "typedoc --out docs ./src --entryPointStrategy expand",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
