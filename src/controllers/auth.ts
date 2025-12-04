@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import container from '../config/diContainer.js';
 import type { LoginInDTO, SignUpInDTO, UserInDTO, UserOutDTO } from '../models/index.js';
+import type { LinkedAccountsRepository } from '../repositories/LinkedAccountsRepository.js';
 import type { CognitoAuthService } from '../services/cognitoAuth.service.js';
 import type { UserService } from '../services/index.js';
 import { logger } from '../utils/logger.js';
@@ -8,10 +9,14 @@ import { logger } from '../utils/logger.js';
 export class AuthController {
   private readonly authService: CognitoAuthService;
   private readonly userService: UserService;
+  private readonly linkedAccountsRepo: LinkedAccountsRepository;
 
   constructor() {
     this.authService = container.resolve<CognitoAuthService>('cognitoAuthService');
     this.userService = container.resolve<UserService>('userService');
+    this.linkedAccountsRepo = container.resolve<LinkedAccountsRepository>(
+      'linkedAccountsRepository'
+    );
   }
 
   /**
@@ -33,7 +38,25 @@ export class AuthController {
 
       const tokens = await this.authService.loginWithPassword(email, password);
 
-      const userInfo = await this.authService.getUserInfo(tokens.idToken);
+      const cognitoUserInfo = await this.authService.getUserInfo(tokens.idToken);
+
+      // Buscar el usuario en linked_accounts para obtener el ID de la BD
+      const linkedAccount = await this.linkedAccountsRepo.getLinkedAccountByProviderAndExternalId(
+        'cognito',
+        cognitoUserInfo.userId
+      );
+
+      if (!linkedAccount) {
+        logger.error(
+          `Linked account not found for Cognito SUB: ${cognitoUserInfo.userId} after login`
+        );
+        res.status(404).json({
+          success: false,
+          message: 'User account not found in the system',
+          error: 'USER_NOT_FOUND',
+        });
+        return;
+      }
 
       res.json({
         success: true,
@@ -43,7 +66,16 @@ export class AuthController {
           refreshToken: tokens.refreshToken,
           expiresIn: tokens.expiresIn,
           tokenType: tokens.tokenType,
-          user: userInfo,
+          user: {
+            id: linkedAccount.userId, // ID de la base de datos
+            cognitoSub: cognitoUserInfo.userId, // ID de Cognito
+            username: cognitoUserInfo.username,
+            email: cognitoUserInfo.email,
+            emailVerified: cognitoUserInfo.emailVerified,
+            phoneNumber: cognitoUserInfo.phoneNumber,
+            phoneNumberVerified: cognitoUserInfo.phoneNumberVerified,
+            groups: cognitoUserInfo.groups,
+          },
         },
         message: 'Login successful',
       });
@@ -206,13 +238,43 @@ export class AuthController {
         return;
       }
 
-      const userInfo = await this.authService.getUserInfo(token);
+      const cognitoUserInfo = await this.authService.getUserInfo(token);
+
+      // Buscar el usuario en linked_accounts para obtener el ID de la BD
+      const linkedAccount = await this.linkedAccountsRepo.getLinkedAccountByProviderAndExternalId(
+        'cognito',
+        cognitoUserInfo.userId
+      );
+
+      if (!linkedAccount) {
+        logger.warn(
+          `Linked account not found for Cognito SUB: ${cognitoUserInfo.userId} during token verification`
+        );
+        res.status(404).json({
+          success: false,
+          data: {
+            valid: false,
+          },
+          message: 'User account not found in the system',
+          error: 'USER_NOT_FOUND',
+        });
+        return;
+      }
 
       res.json({
         success: true,
         data: {
           valid: true,
-          user: userInfo,
+          user: {
+            id: linkedAccount.userId, // ID de la base de datos
+            cognitoSub: cognitoUserInfo.userId, // ID de Cognito
+            username: cognitoUserInfo.username,
+            email: cognitoUserInfo.email,
+            emailVerified: cognitoUserInfo.emailVerified,
+            phoneNumber: cognitoUserInfo.phoneNumber,
+            phoneNumberVerified: cognitoUserInfo.phoneNumberVerified,
+            groups: cognitoUserInfo.groups,
+          },
         },
         message: 'Token is valid',
       });

@@ -1,5 +1,4 @@
-import type { AnyColumn } from 'drizzle-orm';
-import { and, asc, count, desc, eq, type SQL } from 'drizzle-orm';
+import { type AnyColumn, and, asc, count, desc, eq, type SQL } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
 import { linked_accounts, users } from '../../db/schema.js';
 import type {
@@ -96,6 +95,24 @@ export class LinkedAccountsRepositoryPostgreSQL implements LinkedAccountsReposit
 
     if (!account) {
       throw new Error('Linked account not found');
+    }
+
+    return this.parseLinkedAccountToDTO(account);
+  }
+
+  public async getLinkedAccountByProviderAndExternalId(
+    provider: string,
+    externalId: string
+  ): Promise<LinkedAccountOutDTO | null> {
+    const [account] = await this.client
+      .select()
+      .from(linked_accounts)
+      .where(
+        and(eq(linked_accounts.provider, provider), eq(linked_accounts.external_id, externalId))
+      );
+
+    if (!account) {
+      return null;
     }
 
     return this.parseLinkedAccountToDTO(account);

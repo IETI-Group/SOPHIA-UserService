@@ -4,7 +4,7 @@
 
 @host = http://localhost:80
 @prefix = /api/v1
-@auth_token =
+@auth_token = 
 
 # ============================================
 # AUTH ENDPOINTS
