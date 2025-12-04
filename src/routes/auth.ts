@@ -1,16 +1,35 @@
-import { type IRouter, Router } from 'express';
+import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
+import { validationResult } from 'express-validator';
 import { AuthController } from '../controllers/auth.js';
 import { authenticate } from '../middleware/auth.js';
+import { loginInDTO, signUpInDTO } from '../utils/validators.js';
 
 const router: IRouter = Router();
 const authController = new AuthController();
 
 /**
- * @route   GET /auth/login
- * @desc    Obtiene la URL de login de AWS Cognito
+ * @route   GET /auth/login/url
+ * @desc    Obtiene la URL de login OAuth2 de AWS Cognito (flujo alternativo)
  * @access  Public
  */
-router.get('/login', authController.login);
+router.get('/login/url', authController.getLoginUrl);
+
+/**
+ * @route   POST /auth/login
+ * @desc    Login con email y contraseña (flujo principal)
+ * @access  Public
+ */
+router.post('/login', loginInDTO, async (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array(),
+    });
+  }
+  return authController.loginWithCredentials(req, res).catch(next);
+});
 
 /**
  * @route   GET /auth/callback
@@ -39,5 +58,22 @@ router.get('/me', authenticate, authController.me);
  * @access  Public
  */
 router.post('/verify', authController.verify);
+
+/**
+ * @route   POST /auth/signup
+ * @desc    Registra un nuevo usuario en la base de datos y en Cognito
+ * @access  Public
+ */
+router.post('/signup', signUpInDTO, async (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array(),
+    });
+  }
+  return authController.signup(req, res).catch(next);
+});
 
 export default router;

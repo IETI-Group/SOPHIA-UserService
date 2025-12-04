@@ -10,15 +10,15 @@ Para el correcto funcionamiento del sistema de autenticación, se requiere confi
 
 | Variable | Descripción | Ejemplo |
 | :--- | :--- | :--- |
-| `COGNITO_USER_POOL_ID` | Identificador único del **User Pool** en AWS Cognito. | `us-east-2_7jlqVno1e` |
+| `COGNITO_USER_POOL_ID` | Identificador único del **User Pool** en AWS Cognito. | `us-east-2_EqCaX4s7M` |
 | `COGNITO_REGION` | Región de AWS donde reside el User Pool. | `us-east-2` |
-| `AUTH_CLIENT_ID` | Client ID de la aplicación en el User Pool. | `tu_client_id` |
-| `AUTH_CLIENT_SECRET` | Client Secret de la aplicación (si aplica). | `tu_client_secret` |
-| `COGNITO_DOMAIN` | Dominio de la interfaz de usuario alojada de Cognito. | `us-east-27jlqvno1e.auth.us-east-2.amazoncognito.com` |
-| `COGNITO_CALLBACK_URL` | URL de redireccionamiento después de un login exitoso. | `http://localhost:3000/api/v1/auth/callback` |
-| `COGNITO_LOGOUT_URL` | URL de redireccionamiento después de cerrar sesión. | `http://localhost:3000` |
-| `COGNITO_ISSUER` | URL del emisor de tokens para la verificación JWT. | `https://cognito-idp.us-east-2.amazonaws.com/us-east-2_7jlqVno1e` |
-| `COGNITO_JWKS_URI` | URI para obtener las claves públicas de verificación de tokens. | `https://cognito-idp.us-east-2.amazonaws.com/us-east-2_7jlqVno1e/.well-known/jwks.json` |
+| `AUTH_CLIENT_ID` | Client ID de la aplicación en el User Pool. | `2cbd8jptf6g9j8u8an0lbctv2b` |
+| `AUTH_CLIENT_SECRET` | Client Secret de la aplicación (si aplica). | `bbvhelhqqd9q95osn7gpmkv4geu0qh0ls2esekcg018hm18tfhs` |
+| `COGNITO_DOMAIN` | Dominio de la interfaz de usuario alojada de Cognito. | `us-east-2eqcax4s7m.auth.us-east-2.amazoncognito.com` |
+| `COGNITO_CALLBACK_URL` | URL de redireccionamiento después de un login exitoso. | `http://localhost:80/api/v1/auth/callback` |
+| `COGNITO_LOGOUT_URL` | URL de redireccionamiento después de cerrar sesión. | `http://localhost:80` |
+| `COGNITO_ISSUER` | URL del emisor de tokens para la verificación JWT. | `https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EqCaX4s7M` |
+| `COGNITO_JWKS_URI` | URI para obtener las claves públicas de verificación de tokens. | `https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EqCaX4s7M/.well-known/jwks.json` |
 
 > **Nota:** Los valores de `AUTH_CLIENT_ID` y `AUTH_CLIENT_SECRET` deben corresponder a la configuración real del App Client en AWS Cognito.
 
@@ -164,6 +164,119 @@ const response = await fetch('/api/v1/auth/logout');
 const { data } = await response.json();
 localStorage.removeItem('token'); // Limpiar token local
 window.location.href = data.logoutUrl;
+```
+
+### 6. Registro de Usuario (Sign Up)
+
+**POST** `/api/v1/auth/signup`
+
+Registra un nuevo usuario en la base de datos y en AWS Cognito. Este endpoint crea el usuario en ambos sistemas y vincula la cuenta de Cognito con el perfil de usuario en la base de datos.
+
+**Body:**
+```json
+{
+  "email": "usuario@ejemplo.com",
+  "password": "Password123!",
+  "firstName": "Juan",
+  "lastName": "Pérez",
+  "birthDate": "1990-05-15"
+}
+```
+
+**Validaciones:**
+- **email**: Debe ser un email válido, máximo 254 caracteres
+- **password**: Mínimo 8 caracteres, debe contener al menos una mayúscula, una minúscula, un número y un carácter especial
+- **firstName**: Entre 2 y 60 caracteres
+- **lastName**: Entre 2 y 100 caracteres
+- **birthDate**: Formato YYYY-MM-DD, el usuario debe tener al menos 13 años
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "userId": "uuid-del-usuario",
+      "email": "usuario@ejemplo.com",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "birthDate": "1990-05-15T00:00:00.000Z",
+      "createdAt": "2025-12-04T18:30:00.000Z"
+    },
+    "cognitoSub": "cognito-user-sub-id",
+    "message": "User registered successfully. Please check your email to verify your account.",
+    "emailVerificationRequired": true
+  },
+  "message": "User registered successfully"
+}
+```
+
+**Respuestas de Error:**
+
+- **400 Bad Request** - Validación fallida
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "password",
+      "message": "Password must contain at least one uppercase letter..."
+    }
+  ]
+}
+```
+
+- **409 Conflict** - El usuario ya existe
+```json
+{
+  "success": false,
+  "message": "User already exists with this email",
+  "error": "USER_ALREADY_EXISTS"
+}
+```
+
+- **500 Internal Server Error** - Error en Cognito o Base de Datos
+```json
+{
+  "success": false,
+  "message": "Failed to create user in authentication system",
+  "error": "COGNITO_SIGNUP_FAILED"
+}
+```
+
+**Notas Importantes:**
+1. El usuario recibirá un email de verificación de Cognito después del registro
+2. El usuario debe verificar su email antes de poder iniciar sesión (dependiendo de la configuración del User Pool)
+3. La contraseña debe cumplir con la política de seguridad de Cognito (8+ caracteres, mayúscula, minúscula, número, símbolo)
+4. Se crea automáticamente una entrada en `linked_accounts` para rastrear la relación con Cognito
+
+**Uso en el frontend:**
+```javascript
+const signUp = async (userData) => {
+  try {
+    const response = await fetch('/api/v1/auth/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      console.log('User registered:', result.data.user);
+      if (result.data.emailVerificationRequired) {
+        alert('Please check your email to verify your account');
+      }
+    } else {
+      console.error('Registration failed:', result.message);
+    }
+  } catch (error) {
+    console.error('Error during registration:', error);
+  }
+};
 ```
 
 ## Proteger Rutas

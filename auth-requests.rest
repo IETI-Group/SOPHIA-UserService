@@ -1,0 +1,149 @@
+# API REST - Auth Endpoints
+# Usar extension de REST Client para VSCode para probar las peticiones
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@host = http://localhost:80
+@prefix = /api/v1
+@auth_token =
+
+# ============================================
+# AUTH ENDPOINTS
+# ============================================
+
+### Sign Up - Registrar nuevo usuario
+POST {{host}}{{prefix}}/auth/signup
+Content-Type: application/json
+
+{
+  "email": "test.user@ejemplo.com",
+  "password": "Password123!",
+  "firstName": "Test",
+  "lastName": "User",
+  "birthDate": "1995-06-15"
+}
+
+### Login con Credenciales - Flujo principal
+POST {{host}}{{prefix}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test.user@ejemplo.com",
+  "password": "Password123!"
+}
+
+### Get Login URL (OAuth2 - flujo alternativo)
+GET {{host}}{{prefix}}/auth/login/url
+
+### Auth Callback (llamado automáticamente por Cognito)
+GET {{host}}{{prefix}}/auth/callback?code=authorization_code_here
+
+### Verify Token
+POST {{host}}{{prefix}}/auth/verify
+Content-Type: application/json
+
+{
+  "token": "{{auth_token}}"
+}
+
+### Get Current User Info (requiere autenticación)
+GET {{host}}{{prefix}}/auth/me
+Authorization: Bearer {{auth_token}}
+
+### Get Logout URL
+GET {{host}}{{prefix}}/auth/logout
+
+# ============================================
+# EJEMPLOS DE ERRORES
+# ============================================
+
+### Sign Up - Email duplicado (debe retornar 409)
+POST {{host}}{{prefix}}/auth/signup
+Content-Type: application/json
+
+{
+  "email": "test.user@ejemplo.com",
+  "password": "Password123!",
+  "firstName": "Test",
+  "lastName": "User",
+  "birthDate": "1995-06-15"
+}
+
+### Sign Up - Contraseña débil (debe retornar 400)
+POST {{host}}{{prefix}}/auth/signup
+Content-Type: application/json
+
+{
+  "email": "newuser@ejemplo.com",
+  "password": "123456",
+  "firstName": "New",
+  "lastName": "User",
+  "birthDate": "1995-06-15"
+}
+
+### Sign Up - Email inválido (debe retornar 400)
+POST {{host}}{{prefix}}/auth/signup
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "Password123!",
+  "firstName": "Invalid",
+  "lastName": "Email",
+  "birthDate": "1995-06-15"
+}
+
+### Sign Up - Menor de edad (debe retornar 400)
+POST {{host}}{{prefix}}/auth/signup
+Content-Type: application/json
+
+{
+  "email": "kid@ejemplo.com",
+  "password": "Password123!",
+  "firstName": "Young",
+  "lastName": "Kid",
+  "birthDate": "2015-01-01"
+}
+
+### Sign Up - Fecha futura (debe retornar 400)
+POST {{host}}{{prefix}}/auth/signup
+Content-Type: application/json
+
+{
+  "email": "future@ejemplo.com",
+  "password": "Password123!",
+  "firstName": "Time",
+  "lastName": "Traveler",
+  "birthDate": "2030-01-01"
+}
+
+# ============================================
+# LOGIN - EJEMPLOS DE ERRORES
+# ============================================
+
+### Login - Contraseña incorrecta (debe retornar 401)
+POST {{host}}{{prefix}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test.user@ejemplo.com",
+  "password": "WrongPassword123!"
+}
+
+### Login - Usuario no existe (debe retornar 404)
+POST {{host}}{{prefix}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@ejemplo.com",
+  "password": "Password123!"
+}
+
+### Login - Email no confirmado (debe retornar 403)
+POST {{host}}{{prefix}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "unconfirmed@ejemplo.com",
+  "password": "Password123!"
+}
+

@@ -55,6 +55,7 @@
     "vitest-mock-extended": "3.1.0"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.943.0",
     "@types/express": "^5.0.3",
     "cors": "^2.8.5",
     "dotenv": "17.2.2",

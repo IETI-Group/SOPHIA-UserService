@@ -1,3 +1,6 @@
+import type { LoginInDTO } from './auth/LoginInDTO.js';
+import type { SignUpInDTO } from './auth/SignUpInDTO.js';
+import type { SignUpOutDTO } from './auth/SignUpOutDTO.js';
 import type { LearningPathInDTO } from './learning-path/LearningPathInDTO.js';
 import type { LearningPathOutDTO } from './learning-path/LearningPathOutDTO.js';
 import type { LinkedAccountInDTO } from './linked-account/LinkedAccountInDTO.js';
@@ -38,4 +41,7 @@ export type {
   ApiResponse,
   ApiErrorResponse,
   ApiRequestBatchUsers,
+  SignUpInDTO,
+  SignUpOutDTO,
+  LoginInDTO,
 };

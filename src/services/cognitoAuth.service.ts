@@ -1,3 +1,14 @@
+import { createHmac } from 'node:crypto';
+import {
+  AdminCreateUserCommand,
+  type AdminCreateUserCommandInput,
+  type AuthenticationResultType,
+  CognitoIdentityProviderClient,
+  InitiateAuthCommand,
+  type InitiateAuthCommandInput,
+  SignUpCommand,
+  type SignUpCommandInput,
+} from '@aws-sdk/client-cognito-identity-provider';
 import { importSPKI, type JWTPayload, jwtVerify } from 'jose';
 import jwksClient from 'jwks-rsa';
 import { envConfig } from '../config/env.config.js';
@@ -31,6 +42,7 @@ export class CognitoAuthService {
   private readonly jwksClient: jwksClient.JwksClient;
   private readonly issuer: string;
   private readonly audience: string;
+  private readonly cognitoClient: CognitoIdentityProviderClient;
 
   constructor() {
     this.jwksClient = jwksClient({
@@ -43,6 +55,22 @@ export class CognitoAuthService {
 
     this.issuer = envConfig.cognito.issuer;
     this.audience = envConfig.cognito.clientId || '';
+
+    // Initialize AWS Cognito client
+    this.cognitoClient = new CognitoIdentityProviderClient({
+      region: envConfig.cognito.region,
+    });
+  }
+
+  /**
+   * Calcula el SECRET_HASH requerido por Cognito cuando el cliente tiene un secret configurado
+   * SECRET_HASH = Base64(HMAC_SHA256(username + clientId, clientSecret))
+   */
+  private calculateSecretHash(username: string): string {
+    const message = username + this.audience;
+    const hmac = createHmac('sha256', envConfig.cognito.clientSecret || '');
+    hmac.update(message);
+    return hmac.digest('base64');
   }
 
   private async getSigningKey(kid: string): Promise<string> {
@@ -155,5 +183,168 @@ export class CognitoAuthService {
     }
 
     return response.json();
+  }
+
+  /**
+   * Inicia sesión con email y password usando el flujo USER_PASSWORD_AUTH
+   * Retorna los tokens de acceso directamente sin necesidad de OAuth2
+   */
+  async loginWithPassword(
+    email: string,
+    password: string
+  ): Promise<{
+    accessToken: string;
+    idToken: string;
+    refreshToken: string;
+    expiresIn: number;
+    tokenType: string;
+  }> {
+    try {
+      const input: InitiateAuthCommandInput = {
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: this.audience,
+        AuthParameters: {
+          USERNAME: email,
+          PASSWORD: password,
+          SECRET_HASH: this.calculateSecretHash(email),
+        },
+      };
+
+      const command = new InitiateAuthCommand(input);
+      const response = await this.cognitoClient.send(command);
+
+      if (!response.AuthenticationResult) {
+        throw new Error('Authentication failed - no tokens returned');
+      }
+
+      const authResult: AuthenticationResultType = response.AuthenticationResult;
+
+      logger.info(`User ${email} logged in successfully`);
+
+      return {
+        accessToken: authResult.AccessToken || '',
+        idToken: authResult.IdToken || '',
+        refreshToken: authResult.RefreshToken || '',
+        expiresIn: authResult.ExpiresIn || 3600,
+        tokenType: authResult.TokenType || 'Bearer',
+      };
+    } catch (error) {
+      logger.error('Error logging in with password:', error);
+      if (error instanceof Error) {
+        throw new Error(`Login failed: ${error.message}`);
+      }
+      throw new Error('Login failed');
+    }
+  }
+
+  /**
+   * Registra un nuevo usuario en Cognito usando SignUp
+   * El usuario necesitará verificar su email antes de poder iniciar sesión
+   */
+  async signUp(params: {
+    email: string;
+    password: string;
+    givenName: string;
+    familyName: string;
+    birthdate: string;
+  }): Promise<{
+    userSub: string;
+    userConfirmed: boolean;
+    codeDeliveryDetails?: {
+      destination?: string;
+      deliveryMedium?: string;
+      attributeName?: string;
+    };
+  }> {
+    try {
+      const input: SignUpCommandInput = {
+        ClientId: this.audience,
+        Username: params.email,
+        Password: params.password,
+        SecretHash: this.calculateSecretHash(params.email),
+        UserAttributes: [
+          { Name: 'email', Value: params.email },
+          { Name: 'given_name', Value: params.givenName }, // firstName
+          { Name: 'middle_name', Value: params.familyName }, // lastName como middle_name (requerido)
+          { Name: 'birthdate', Value: params.birthdate },
+          { Name: 'name', Value: `${params.givenName} ${params.familyName}` },
+        ],
+      };
+
+      const command = new SignUpCommand(input);
+      const response = await this.cognitoClient.send(command);
+
+      logger.info(`User ${params.email} signed up successfully in Cognito`);
+
+      return {
+        userSub: response.UserSub || '',
+        userConfirmed: response.UserConfirmed || false,
+        codeDeliveryDetails: response.CodeDeliveryDetails
+          ? {
+              destination: response.CodeDeliveryDetails.Destination,
+              deliveryMedium: response.CodeDeliveryDetails.DeliveryMedium,
+              attributeName: response.CodeDeliveryDetails.AttributeName,
+            }
+          : undefined,
+      };
+    } catch (error) {
+      logger.error('Error signing up user in Cognito:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to sign up user: ${error.message}`);
+      }
+      throw new Error('Failed to sign up user');
+    }
+  }
+
+  /**
+   * Crea un usuario en Cognito como administrador
+   * El usuario puede iniciar sesión inmediatamente sin verificación de email
+   * (Solo funciona si el User Pool permite creación de usuarios por admin)
+   */
+  async adminCreateUser(params: {
+    email: string;
+    temporaryPassword: string;
+    givenName: string;
+    familyName: string;
+    birthdate: string;
+    suppressEmail?: boolean;
+  }): Promise<{
+    userSub: string;
+    username: string;
+  }> {
+    try {
+      const input: AdminCreateUserCommandInput = {
+        UserPoolId: envConfig.cognito.userPoolId,
+        Username: params.email,
+        TemporaryPassword: params.temporaryPassword,
+        UserAttributes: [
+          { Name: 'email', Value: params.email },
+          { Name: 'email_verified', Value: 'true' }, // Mark email as verified
+          { Name: 'given_name', Value: params.givenName }, // firstName
+          { Name: 'middle_name', Value: params.familyName }, // lastName como middle_name (requerido)
+          { Name: 'birthdate', Value: params.birthdate },
+          { Name: 'name', Value: `${params.givenName} ${params.familyName}` },
+        ],
+        MessageAction: params.suppressEmail ? 'SUPPRESS' : undefined,
+      };
+
+      const command = new AdminCreateUserCommand(input);
+      const response = await this.cognitoClient.send(command);
+
+      logger.info(`User ${params.email} created by admin in Cognito`);
+
+      const userSub = response.User?.Attributes?.find((attr) => attr.Name === 'sub')?.Value || '';
+
+      return {
+        userSub,
+        username: response.User?.Username || params.email,
+      };
+    } catch (error) {
+      logger.error('Error creating user in Cognito as admin:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to create user: ${error.message}`);
+      }
+      throw new Error('Failed to create user');
+    }
   }
 }
