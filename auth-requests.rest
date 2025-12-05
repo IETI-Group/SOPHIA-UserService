@@ -52,6 +52,53 @@ Authorization: Bearer {{auth_token}}
 ### Get Logout URL
 GET {{host}}{{prefix}}/auth/logout
 
+### Confirm Email
+POST {{host}}{{prefix}}/auth/confirm-email
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "confirmationCode": "example_code"
+}
+
+### Resend Confirmation Code
+POST {{host}}{{prefix}}/auth/resend-confirmation
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com"
+}
+
+# ============================================
+# EJEMPLOS DE ERRORES - CONFIRMACIÓN
+# ============================================
+
+### Confirm Email - Código inválido (debe retornar 400)
+POST {{host}}{{prefix}}/auth/confirm-email
+Content-Type: application/json
+
+{
+  "email": "test.user@ejemplo.com",
+  "confirmationCode": "000000"
+}
+
+### Confirm Email - Usuario ya verificado (debe retornar 400)
+POST {{host}}{{prefix}}/auth/confirm-email
+Content-Type: application/json
+
+{
+  "email": "verified@ejemplo.com",
+  "confirmationCode": "123456"
+}
+
+### Resend Confirmation - Usuario no existe (debe retornar 404)
+POST {{host}}{{prefix}}/auth/resend-confirmation
+Content-Type: application/json
+
+{
+  "email": "nonexistent@ejemplo.com"
+}
+
 # ============================================
 # EJEMPLOS DE ERRORES
 # ============================================

@@ -4,8 +4,10 @@ import {
   type AdminCreateUserCommandInput,
   type AuthenticationResultType,
   CognitoIdentityProviderClient,
+  ConfirmSignUpCommand,
   InitiateAuthCommand,
   type InitiateAuthCommandInput,
+  ResendConfirmationCodeCommand,
   SignUpCommand,
   type SignUpCommandInput,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -345,6 +347,61 @@ export class CognitoAuthService {
         throw new Error(`Failed to create user: ${error.message}`);
       }
       throw new Error('Failed to create user');
+    }
+  }
+
+  /**
+   * Confirma el email de un usuario usando el código de verificación
+   */
+  async confirmEmail(email: string, confirmationCode: string): Promise<void> {
+    try {
+      const command = new ConfirmSignUpCommand({
+        ClientId: this.audience,
+        Username: email,
+        ConfirmationCode: confirmationCode,
+        SecretHash: this.calculateSecretHash(email),
+      });
+
+      await this.cognitoClient.send(command);
+
+      logger.info(`Email confirmed successfully for user: ${email}`);
+    } catch (error) {
+      logger.error('Error confirming email:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to confirm email: ${error.message}`);
+      }
+      throw new Error('Failed to confirm email');
+    }
+  }
+
+  /**
+   * Reenvía el código de confirmación al email del usuario
+   */
+  async resendConfirmationCode(email: string): Promise<{
+    destination?: string;
+    deliveryMedium?: string;
+  }> {
+    try {
+      const command = new ResendConfirmationCodeCommand({
+        ClientId: this.audience,
+        Username: email,
+        SecretHash: this.calculateSecretHash(email),
+      });
+
+      const response = await this.cognitoClient.send(command);
+
+      logger.info(`Confirmation code resent successfully to: ${email}`);
+
+      return {
+        destination: response.CodeDeliveryDetails?.Destination,
+        deliveryMedium: response.CodeDeliveryDetails?.DeliveryMedium,
+      };
+    } catch (error) {
+      logger.error('Error resending confirmation code:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to resend confirmation code: ${error.message}`);
+      }
+      throw new Error('Failed to resend confirmation code');
     }
   }
 }

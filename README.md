@@ -2,7 +2,7 @@
 
 Servicio de usuarios para el proyecto SOPHIA, desarrollado con Node.js, Express, TypeScript y una arquitectura escalable.
 
-## � Descripción del Proyecto
+##  Descripción del Proyecto
 
 SOPHIA User Service es un microservicio backend diseñado para gestionar usuarios dentro del ecosistema SOPHIA. Este servicio proporciona una API RESTful robusta y escalable para operaciones relacionadas con usuarios, incluyendo autorización y gestión de perfiles. Construido con tecnologías modernas como Node.js y TypeScript, implementa mejores prácticas de desarrollo, incluyendo manejo centralizado de errores, logging estructurado, testing automatizado y contenerización con Docker.
 
@@ -91,7 +91,7 @@ Este tablero contiene:
 - **Criterios de Aceptación**: Definición de "Terminado" para cada funcionalidad
 - **Roadmap**: Planificación temporal del desarrollo
 
-## �🚀 Tecnologías
+## 🚀 Tecnologías
 
 - **Node.js 24** + **TypeScript 5.9**
 - **Express 5** - Framework web para Node.js
@@ -153,7 +153,7 @@ Respuesta exitosa:
 }
 ```
 
-## �� Docker
+## Docker
 
 Este proyecto incluye configuración completa de Docker con múltiples entornos.
 

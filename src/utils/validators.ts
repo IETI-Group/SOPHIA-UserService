@@ -232,6 +232,30 @@ export const loginInDTO: ValidationChain[] = [
   body('password').isString().notEmpty().withMessage('Password is required'),
 ];
 
+export const confirmEmailDTO: ValidationChain[] = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 254 })
+    .withMessage('A valid email is required'),
+  body('confirmationCode')
+    .isString()
+    .notEmpty()
+    .withMessage('Confirmation code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Confirmation code must be exactly 6 digits')
+    .matches(/^\d{6}$/)
+    .withMessage('Confirmation code must contain only numbers'),
+];
+
+export const resendConfirmationDTO: ValidationChain[] = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 254 })
+    .withMessage('A valid email is required'),
+];
+
 // ============================================
 // ADMIN VALIDATORS
 // ============================================

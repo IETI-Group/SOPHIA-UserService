@@ -2,7 +2,12 @@ import { type IRouter, type NextFunction, type Request, type Response, Router } 
 import { validationResult } from 'express-validator';
 import { AuthController } from '../controllers/auth.js';
 import { authenticate } from '../middleware/auth.js';
-import { loginInDTO, signUpInDTO } from '../utils/validators.js';
+import {
+  confirmEmailDTO,
+  loginInDTO,
+  resendConfirmationDTO,
+  signUpInDTO,
+} from '../utils/validators.js';
 
 const router: IRouter = Router();
 const authController = new AuthController();
@@ -75,5 +80,47 @@ router.post('/signup', signUpInDTO, async (req: Request, res: Response, next: Ne
   }
   return authController.signup(req, res).catch(next);
 });
+
+/**
+ * @route   POST /auth/confirm-email
+ * @desc    Confirma el email de un usuario usando el código de verificación
+ * @access  Public
+ */
+router.post(
+  '/confirm-email',
+  confirmEmailDTO,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array(),
+      });
+    }
+    return authController.confirmEmail(req, res).catch(next);
+  }
+);
+
+/**
+ * @route   POST /auth/resend-confirmation
+ * @desc    Reenvía el código de confirmación al email del usuario
+ * @access  Public
+ */
+router.post(
+  '/resend-confirmation',
+  resendConfirmationDTO,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array(),
+      });
+    }
+    return authController.resendConfirmationCode(req, res).catch(next);
+  }
+);
 
 export default router;

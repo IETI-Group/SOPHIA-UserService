@@ -1,6 +1,13 @@
 import type { Request, Response } from 'express';
 import container from '../config/diContainer.js';
-import type { LoginInDTO, SignUpInDTO, UserInDTO, UserOutDTO } from '../models/index.js';
+import type {
+  ConfirmEmailInDTO,
+  LoginInDTO,
+  ResendConfirmationInDTO,
+  SignUpInDTO,
+  UserInDTO,
+  UserOutDTO,
+} from '../models/index.js';
 import type { LinkedAccountsRepository } from '../repositories/LinkedAccountsRepository.js';
 import type { CognitoAuthService } from '../services/cognitoAuth.service.js';
 import type { UserService } from '../services/index.js';
@@ -19,10 +26,6 @@ export class AuthController {
     );
   }
 
-  /**
-   * Login con email y password (sin OAuth2)
-   * Usa el flujo USER_PASSWORD_AUTH de Cognito
-   */
   loginWithCredentials = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password }: LoginInDTO = req.body;
@@ -112,9 +115,6 @@ export class AuthController {
     }
   };
 
-  /**
-   * Obtiene la URL de login OAuth2 de Cognito (flujo alternativo)
-   */
   getLoginUrl = (_req: Request, res: Response): void => {
     try {
       const state = Math.random().toString(36).substring(7);
@@ -381,6 +381,127 @@ export class AuthController {
         message: 'An unexpected error occurred during signup',
         error: 'INTERNAL_SERVER_ERROR',
       });
+    }
+  };
+
+  confirmEmail = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { email, confirmationCode }: ConfirmEmailInDTO = req.body;
+
+      if (!email || !confirmationCode) {
+        res.status(400).json({
+          success: false,
+          message: 'Email and confirmation code are required',
+          error: 'BAD_REQUEST',
+        });
+        return;
+      }
+
+      await this.authService.confirmEmail(email, confirmationCode);
+
+      res.json({
+        success: true,
+        data: {
+          email,
+          verified: true,
+        },
+        message: 'Email confirmed successfully',
+      });
+    } catch (error) {
+      logger.error('Error confirming email:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Confirmation failed';
+
+      if (errorMessage.includes('Invalid code') || errorMessage.includes('Code mismatch')) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid or expired confirmation code',
+          error: 'INVALID_CODE',
+        });
+      } else if (errorMessage.includes('already confirmed')) {
+        res.status(400).json({
+          success: false,
+          message: 'Email is already verified',
+          error: 'ALREADY_VERIFIED',
+        });
+      } else if (errorMessage.includes('User does not exist')) {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+          error: 'USER_NOT_FOUND',
+        });
+      } else if (errorMessage.includes('Attempt limit exceeded')) {
+        res.status(429).json({
+          success: false,
+          message: 'Too many failed attempts. Please request a new code.',
+          error: 'TOO_MANY_ATTEMPTS',
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to confirm email',
+          error: 'CONFIRMATION_FAILED',
+        });
+      }
+    }
+  };
+
+  resendConfirmationCode = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { email }: ResendConfirmationInDTO = req.body;
+
+      if (!email) {
+        res.status(400).json({
+          success: false,
+          message: 'Email is required',
+          error: 'BAD_REQUEST',
+        });
+        return;
+      }
+
+      const result = await this.authService.resendConfirmationCode(email);
+
+      res.json({
+        success: true,
+        data: {
+          email,
+          codeDelivery: {
+            deliveryMedium: result.deliveryMedium || 'EMAIL',
+            destination: result.destination || email.replace(/(.{1})(.*)(@.*)/, '$1***$3'),
+          },
+        },
+        message: 'Confirmation code sent successfully',
+      });
+    } catch (error) {
+      logger.error('Error resending confirmation code:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Resend failed';
+
+      if (errorMessage.includes('already confirmed')) {
+        res.status(400).json({
+          success: false,
+          message: 'Email is already verified',
+          error: 'ALREADY_VERIFIED',
+        });
+      } else if (errorMessage.includes('User does not exist')) {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+          error: 'USER_NOT_FOUND',
+        });
+      } else if (errorMessage.includes('Attempt limit exceeded')) {
+        res.status(429).json({
+          success: false,
+          message: 'Too many requests. Please try again later.',
+          error: 'TOO_MANY_REQUESTS',
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to resend confirmation code',
+          error: 'RESEND_FAILED',
+        });
+      }
     }
   };
 }
