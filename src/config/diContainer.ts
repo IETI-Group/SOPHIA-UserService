@@ -11,6 +11,7 @@ import {
   RolesRepositoryPostgreSQL,
   UsersRepositoryPostgreSQL,
 } from '../repositories/index.js';
+import { CognitoAuthService } from '../services/cognitoAuth.service.js';
 import { AdminServiceImpl, InstructorServiceImpl, UserServiceImpl } from '../services/index.js';
 import { logger } from '../utils/logger.js';
 import { db } from './db.js';
@@ -72,6 +73,10 @@ container.register({
   }),
 
   instructorController: asClass(InstructorController, {
+    lifetime: Lifetime.SINGLETON,
+  }),
+
+  cognitoAuthService: asClass(CognitoAuthService, {
     lifetime: Lifetime.SINGLETON,
   }),
 });

@@ -15,6 +15,7 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "coverage": "vitest --coverage",
+    "coverage:run": "vitest --coverage --run",
     "doc": "typedoc --out docs ./src --entryPointStrategy expand",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -54,6 +55,7 @@
     "vitest-mock-extended": "3.1.0"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.943.0",
     "@types/express": "^5.0.3",
     "cors": "^2.8.5",
     "dotenv": "17.2.2",
@@ -61,6 +63,8 @@
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
+    "jose": "6.1.2",
+    "jwks-rsa": "3.2.0",
     "morgan": "^1.10.1",
     "pg": "^8.16.3",
     "winston": "^3.17.0"

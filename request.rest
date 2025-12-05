@@ -1,0 +1,20 @@
+# API REST users
+# Usar extension de REST Client para VSCode para probar las peticiones
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# Variables
+
+@host = http://localhost:80
+@prefix = /api/v1
+@auth_token = 
+
+### Obtener todos los users
+GET {{host}}{{prefix}}/users
+Authorization: Bearer {{auth_token}}
+
+### Obtener un user específico   
+GET {{host}}{{prefix}}/users/f1abd510-30a1-706a-6358-48a6fe4acbdf
+Authorization: Bearer {{auth_token}}
+
+### Eliminar un user
+DELETE {{host}}{{prefix}}/users/10
+Authorization: Bearer {{auth_token}}
