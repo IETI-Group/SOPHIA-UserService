@@ -5,11 +5,21 @@ services:
       dockerfile: Dockerfile
       target: production
     container_name: sophia-userservice-app
-    network_mode: host
     environment:
       - NODE_ENV=${NODE_ENV}
       - PORT=${PORT}
       - DATABASE_URL=${DATABASE_URL}
       - DB_SSL=${DB_SSL}
       - JWT_SECRET=${JWT_SECRET}
+      - COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
+      - AUTH_CLIENT_ID=${AUTH_CLIENT_ID}
+      - AUTH_CLIENT_SECRET=${AUTH_CLIENT_SECRET}
+      - COGNITO_REGION=${COGNITO_REGION}
+      - COGNITO_DOMAIN=${COGNITO_DOMAIN}
+      - COGNITO_CALLBACK_URL=${COGNITO_CALLBACK_URL}
+      - COGNITO_LOGOUT_URL=${COGNITO_LOGOUT_URL}
+      - COGNITO_ISSUER=${COGNITO_ISSUER}
+      - COGNITO_JWKS_URI=${COGNITO_JWKS_URI}
+    ports:
+      - ${PORT:-80}:${PORT:-80}
     restart: unless-stopped

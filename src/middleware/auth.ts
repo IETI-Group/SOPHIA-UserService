@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import container from '../config/diContainer.js';
+import type { LinkedAccountsRepository } from '../repositories/LinkedAccountsRepository.js';
 import type { CognitoAuthService } from '../services/cognitoAuth.service.js';
 import { logger } from '../utils/logger.js';
 
@@ -7,7 +8,8 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        userId: string;
+        id: string; // ID de la base de datos (usuario interno)
+        cognitoSub: string; // ID de Cognito
         username: string;
         email?: string;
         emailVerified?: boolean;
@@ -39,10 +41,39 @@ export const authenticate = async (
     const token = authHeader.substring(7); // Remover 'Bearer '
 
     const authService = container.resolve<CognitoAuthService>('cognitoAuthService');
+    const linkedAccountsRepo = container.resolve<LinkedAccountsRepository>(
+      'linkedAccountsRepository'
+    );
 
-    const userInfo = await authService.getUserInfo(token);
+    const cognitoUserInfo = await authService.getUserInfo(token);
 
-    req.user = userInfo;
+    // Buscar el usuario en linked_accounts usando el Cognito SUB
+    const linkedAccount = await linkedAccountsRepo.getLinkedAccountByProviderAndExternalId(
+      'cognito',
+      cognitoUserInfo.userId
+    );
+
+    if (!linkedAccount) {
+      logger.warn(`Linked account not found for Cognito SUB: ${cognitoUserInfo.userId}`);
+      res.status(404).json({
+        success: false,
+        message: 'User account not found in the system',
+        error: 'USER_NOT_FOUND',
+      });
+      return;
+    }
+
+    // Construir el objeto user con el ID de la base de datos
+    req.user = {
+      id: linkedAccount.userId, // ID de la base de datos
+      cognitoSub: cognitoUserInfo.userId, // ID de Cognito
+      username: cognitoUserInfo.username,
+      email: cognitoUserInfo.email,
+      emailVerified: cognitoUserInfo.emailVerified,
+      phoneNumber: cognitoUserInfo.phoneNumber,
+      phoneNumberVerified: cognitoUserInfo.phoneNumberVerified,
+      groups: cognitoUserInfo.groups,
+    };
 
     next();
   } catch (error) {
@@ -69,10 +100,31 @@ export const optionalAuthenticate = async (
 
   const token = authHeader.substring(7);
   const authService = container.resolve<CognitoAuthService>('cognitoAuthService');
+  const linkedAccountsRepo = container.resolve<LinkedAccountsRepository>(
+    'linkedAccountsRepository'
+  );
 
   try {
-    const userInfo = await authService.getUserInfo(token);
-    req.user = userInfo;
+    const cognitoUserInfo = await authService.getUserInfo(token);
+
+    // Buscar el usuario en linked_accounts
+    const linkedAccount = await linkedAccountsRepo.getLinkedAccountByProviderAndExternalId(
+      'cognito',
+      cognitoUserInfo.userId
+    );
+
+    if (linkedAccount) {
+      req.user = {
+        id: linkedAccount.userId,
+        cognitoSub: cognitoUserInfo.userId,
+        username: cognitoUserInfo.username,
+        email: cognitoUserInfo.email,
+        emailVerified: cognitoUserInfo.emailVerified,
+        phoneNumber: cognitoUserInfo.phoneNumber,
+        phoneNumberVerified: cognitoUserInfo.phoneNumberVerified,
+        groups: cognitoUserInfo.groups,
+      };
+    }
   } catch (error) {
     logger.debug('Optional authentication failed:', error);
   }

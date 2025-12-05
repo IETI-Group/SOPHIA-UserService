@@ -167,6 +167,96 @@ export const linkedAccountInDTO = (optional = false): ValidationChain[] => {
 };
 
 // ============================================
+// AUTH VALIDATORS
+// ============================================
+
+export const signUpInDTO: ValidationChain[] = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 254 })
+    .withMessage('A valid email is required'),
+  body('password')
+    .isString()
+    .notEmpty()
+    .isLength({ min: 8 })
+    .withMessage('Password is required and must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage(
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    ),
+  body('firstName')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('First name is required and must be a string')
+    .isLength({ min: 2, max: 60 })
+    .withMessage('First name must be between 2 and 60 characters long'),
+  body('lastName')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('Last name is required and must be a string')
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Last name must be between 2 and 100 characters long'),
+  body('birthDate')
+    .isString()
+    .notEmpty()
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage('Birth date must be a valid date in format YYYY-MM-DD')
+    .custom((value) => {
+      const date = new Date(value);
+      const now = new Date();
+      const minAge = new Date(now.getFullYear() - 13, now.getMonth(), now.getDate());
+      const maxAge = new Date(now.getFullYear() - 120, now.getMonth(), now.getDate());
+
+      if (date > now) {
+        throw new Error('Birth date cannot be in the future');
+      }
+      if (date > minAge) {
+        throw new Error('User must be at least 13 years old');
+      }
+      if (date < maxAge) {
+        throw new Error('Birth date is too far in the past');
+      }
+      return true;
+    }),
+];
+
+export const loginInDTO: ValidationChain[] = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 254 })
+    .withMessage('A valid email is required'),
+  body('password').isString().notEmpty().withMessage('Password is required'),
+];
+
+export const confirmEmailDTO: ValidationChain[] = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 254 })
+    .withMessage('A valid email is required'),
+  body('confirmationCode')
+    .isString()
+    .notEmpty()
+    .withMessage('Confirmation code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Confirmation code must be exactly 6 digits')
+    .matches(/^\d{6}$/)
+    .withMessage('Confirmation code must contain only numbers'),
+];
+
+export const resendConfirmationDTO: ValidationChain[] = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .isLength({ max: 254 })
+    .withMessage('A valid email is required'),
+];
+
+// ============================================
 // ADMIN VALIDATORS
 // ============================================
 

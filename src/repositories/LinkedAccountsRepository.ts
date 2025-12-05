@@ -13,6 +13,10 @@ export interface LinkedAccountsRepository {
     order?: string
   ): Promise<PaginatedLinkedAccounts>;
   getLinkedAccount(accountId: string): Promise<LinkedAccountOutDTO>;
+  getLinkedAccountByProviderAndExternalId(
+    provider: string,
+    externalId: string
+  ): Promise<LinkedAccountOutDTO | null>;
   postLinkedAccount(linkedAccountIn: LinkedAccountInDTO): Promise<LinkedAccountOutDTO>;
   updateLinkedAccount(
     accountId: string,
