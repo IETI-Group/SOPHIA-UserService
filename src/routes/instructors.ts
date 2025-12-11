@@ -3,13 +3,64 @@ import { validationResult } from 'express-validator';
 import container from '../config/diContainer.js';
 import type InstructorController from '../controllers/InstructorController.js';
 import type { InstructorInput } from '../repositories/index.js';
-import { parseInstructorInBody, parseInstructorUpdateInBody } from '../utils/parsers.js';
-import { instructorInDTO, stringParam } from '../utils/validators.js';
+import {
+  parseInstructorInBody,
+  parseInstructorUpdateInBody,
+  parsePaginationQuery,
+} from '../utils/parsers.js';
+import {
+  enumQuery,
+  instructorInDTO,
+  paginationParams,
+  sortingParams,
+  stringParam,
+} from '../utils/validators.js';
 
 const router: IRouter = Router();
 
 // Obtener instancia del controlador desde el contenedor DI
 const instructorController = container.resolve<InstructorController>('instructorController');
+
+/**
+ * @route   GET /api/v1/instructors
+ * @desc    Get all instructors
+ * @access  Public
+ */
+router.get(
+  '/',
+  [
+    ...paginationParams,
+    ...sortingParams,
+    enumQuery(
+      'verification_status',
+      'Invalid verification status',
+      ['verified', 'pending', 'rejected'],
+      true
+    ),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error(
+        `Validation error: ${errors
+          .array()
+          .map((err) => err.msg)
+          .join(', ')}`
+      );
+    }
+
+    const { page, size, sort, order } = parsePaginationQuery(req);
+    const verificationStatus = req.query.verification_status as any;
+    const instructors = await instructorController.getInstructors(
+      page,
+      size,
+      sort,
+      order,
+      verificationStatus
+    );
+    res.json(instructors);
+  }
+);
 
 /**
  * @route   GET /api/v1/instructors/:instructorId

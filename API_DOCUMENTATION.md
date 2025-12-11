@@ -1499,6 +1499,43 @@ Elimina un instructor.
 
 ## Instructors
 
+### GET /api/v1/instructors
+Obtiene todos los instructores con paginación y filtros.
+
+**Access:** Public
+
+**Query Parameters:**
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| page | number | No | Número de página |
+| size | number | No | Cantidad por página |
+| sort | string | No | Campo para ordenar |
+| order | string | No | Orden (asc/desc) |
+| verification_status | string | No | Estado: verified, pending, rejected |
+
+**Respuesta (200):**
+```json
+{
+  "success": true,
+  "message": "Instructors retrieved successfully",
+  "data": [
+    {
+      "instructorId": "uuid",
+      "verificationStatus": "verified",
+      "verifiedAt": "2025-01-01T00:00:00.000Z",
+      "totalRatings": 150,
+      "totalStudents": 500,
+      "totalCourses": 12,
+      "averageRating": 4.8
+    }
+  ],
+  "timestamp": "2025-11-20T10:30:00.000Z",
+  "pagination": {...}
+}
+```
+
+---
+
 ### GET /api/v1/instructors/:instructorId
 Obtiene información de un instructor.
 
@@ -1530,7 +1567,7 @@ Obtiene información de un instructor.
 ---
 
 ### POST /api/v1/instructors
-Registra un nuevo instructor (auto-registro).
+Registra un nuevo instructor. Cualquier usuario puede crear un perfil de instructor.
 
 **Access:** Public
 
@@ -1542,20 +1579,40 @@ Registra un nuevo instructor (auto-registro).
 }
 ```
 
+**Validaciones:**
+- `instructorId`: String requerido (UUID del usuario)
+- `verificationStatus`: Enum opcional: verified, pending, rejected (default: pending)
+- `verifiedAt`: Fecha ISO 8601 opcional
+
 **Respuesta (201):**
 ```json
 {
   "success": true,
   "message": "Instructor created successfully",
-  "data": "uuid-del-instructor",
+  "data": {
+    "instructorId": "uuid",
+    "verificationStatus": "pending",
+    "verifiedAt": null,
+    "totalRatings": 0,
+    "totalStudents": 0,
+    "totalCourses": 0,
+    "averageRating": 0
+  },
   "timestamp": "2025-11-20T10:30:00.000Z"
 }
 ```
 
+**Errores:**
+| Código | Error | Descripción |
+|--------|-------|-------------|
+| 400 | VALIDATION_ERROR | Datos de entrada inválidos |
+| 409 | INSTRUCTOR_ALREADY_EXISTS | El usuario ya es instructor |
+| 500 | INTERNAL_SERVER_ERROR | Error al crear instructor |
+
 ---
 
 ### PUT /api/v1/instructors/:instructorId
-Actualiza información del instructor.
+Actualiza información del instructor. Cualquier usuario puede editar un perfil de instructor.
 
 **Access:** Public
 
@@ -1564,28 +1621,47 @@ Actualiza información del instructor.
 |-----------|------|-------------|
 | instructorId | string | ID del instructor |
 
-**Request Body:** (Campos opcionales)
+**Request Body:** (Todos los campos opcionales)
 ```json
 {
-  "verificationStatus": "pending",
+  "verificationStatus": "verified",
   "verifiedAt": "2025-11-20T10:30:00.000Z"
 }
 ```
+
+**Validaciones:**
+- `verificationStatus`: Enum opcional: verified, pending, rejected
+- `verifiedAt`: Fecha ISO 8601 opcional
 
 **Respuesta (200):**
 ```json
 {
   "success": true,
   "message": "Instructor updated successfully",
-  "data": null,
+  "data": {
+    "instructorId": "uuid",
+    "verificationStatus": "verified",
+    "verifiedAt": "2025-11-20T10:30:00.000Z",
+    "totalRatings": 150,
+    "totalStudents": 500,
+    "totalCourses": 12,
+    "averageRating": 4.8
+  },
   "timestamp": "2025-11-20T10:30:00.000Z"
 }
 ```
 
+**Errores:**
+| Código | Error | Descripción |
+|--------|-------|-------------|
+| 400 | VALIDATION_ERROR | Datos de entrada inválidos |
+| 404 | INSTRUCTOR_NOT_FOUND | Instructor no encontrado |
+| 500 | INTERNAL_SERVER_ERROR | Error al actualizar instructor |
+
 ---
 
 ### DELETE /api/v1/instructors/:instructorId
-Elimina un instructor.
+Elimina un instructor. Cualquier usuario puede eliminar un perfil de instructor.
 
 **Access:** Public
 
@@ -1599,10 +1675,17 @@ Elimina un instructor.
 {
   "success": true,
   "message": "Instructor deleted successfully",
-  "data": null,
+  "data": "Instructor {instructorId} deleted successfully",
   "timestamp": "2025-11-20T10:30:00.000Z"
 }
 ```
+
+**Errores:**
+| Código | Error | Descripción |
+|--------|-------|-------------|
+| 400 | VALIDATION_ERROR | ID de instructor inválido |
+| 404 | INSTRUCTOR_NOT_FOUND | Instructor no encontrado |
+| 500 | INTERNAL_SERVER_ERROR | Error al eliminar instructor |
 
 ---
 

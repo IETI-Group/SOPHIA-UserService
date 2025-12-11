@@ -1,5 +1,6 @@
 import type { Logger } from 'winston';
-import type { ApiResponse } from '../models/index.js';
+import type { VERIFICATION_STATUS } from '../db/schema.js';
+import { type ApiResponse, FiltersInstructor, type PaginatedResponse } from '../models/index.js';
 import type { InstructorInput, InstructorRecord } from '../repositories/index.js';
 import type { InstructorService } from '../services/index.js';
 import { parseApiResponse } from '../utils/parsers.js';
@@ -11,6 +12,17 @@ export default class InstructorController {
   constructor(instructorService: InstructorService, logger: Logger) {
     this.instructorService = instructorService;
     this.logger = logger;
+  }
+
+  public async getInstructors(
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc',
+    verificationStatus?: VERIFICATION_STATUS
+  ): Promise<PaginatedResponse<InstructorRecord>> {
+    const filters = new FiltersInstructor(verificationStatus);
+    return this.instructorService.getInstructors(page, size, sort, order, filters);
   }
 
   public async getInstructor(instructorId: string): Promise<ApiResponse<InstructorRecord>> {
