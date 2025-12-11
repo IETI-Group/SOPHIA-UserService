@@ -20,6 +20,8 @@ describe('Instructor Controller tests', () => {
     it('should return an instructor by ID', async () => {
       const instructorId = 'instructor123';
       const mockInstructor: InstructorRecord = {
+        first_name: 'John',
+        last_name: 'Doe',
         id_instructor: instructorId,
         total_students: 100,
         total_courses: 5,
@@ -52,6 +54,8 @@ describe('Instructor Controller tests', () => {
       };
       const instructorId = 'user123';
       const mockInstructor: InstructorRecord = {
+        first_name: 'Name Test',
+        last_name: 'Last Test',
         id_instructor: instructorId,
         total_students: 0,
         total_courses: 0,
@@ -87,6 +91,8 @@ describe('Instructor Controller tests', () => {
         verifiedAt: new Date(),
       };
       const mockInstructor: InstructorRecord = {
+        first_name: 'John',
+        last_name: 'Doe',
         id_instructor: instructorId,
         total_students: 100,
         total_courses: 5,

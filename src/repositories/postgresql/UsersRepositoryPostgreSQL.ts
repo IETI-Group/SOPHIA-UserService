@@ -1,5 +1,16 @@
-import type { AnyColumn } from 'drizzle-orm';
-import { and, asc, desc, eq, gte, ilike, inArray, lte, type SQL, sql } from 'drizzle-orm';
+import {
+  type AnyColumn,
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  type SQL,
+  sql,
+} from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
 import { ROLE, roles, users, users_roles, type ValidUserSortFields } from '../../db/schema.js';
 import type {
@@ -50,7 +61,12 @@ export class UsersRepositoryPostgreSQL implements UsersRepository {
   private parseUsersToDTOs(usersResult: UsersQueryResult[], lightDTO: boolean): UserOutDTO[] {
     return usersResult.map((user) =>
       lightDTO
-        ? { userId: user.id_user, role: user.role_name }
+        ? {
+            userId: user.id_user,
+            role: user.role_name,
+            firstName: user.first_name,
+            lastName: user.last_name,
+          }
         : {
             userId: user.id_user,
             role: user.role_name,

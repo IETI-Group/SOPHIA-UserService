@@ -369,6 +369,8 @@ describe('AdminServiceImpl tests', () => {
         verifiedAt: new Date(),
       };
       const mockInstructor: InstructorRecord = {
+        first_name: 'John',
+        last_name: 'Doe',
         id_instructor: instructorId,
         total_students: 100,
         total_courses: 5,

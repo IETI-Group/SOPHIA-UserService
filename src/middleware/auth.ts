@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import container from '../config/diContainer.js';
 import type { LinkedAccountsRepository } from '../repositories/LinkedAccountsRepository.js';
+import type { UsersRepository } from '../repositories/UsersRepository.js';
 import type { CognitoAuthService } from '../services/cognitoAuth.service.js';
 import { logger } from '../utils/logger.js';
 
@@ -16,6 +17,8 @@ declare global {
         phoneNumber?: string;
         phoneNumberVerified?: boolean;
         groups?: string[];
+        firstName?: string;
+        lastName?: string;
       };
     }
   }
@@ -44,6 +47,7 @@ export const authenticate = async (
     const linkedAccountsRepo = container.resolve<LinkedAccountsRepository>(
       'linkedAccountsRepository'
     );
+    const usersRepo = container.resolve<UsersRepository>('usersRepository');
 
     const cognitoUserInfo = await authService.getUserInfo(token);
 
@@ -63,6 +67,9 @@ export const authenticate = async (
       return;
     }
 
+    // Obtener información adicional del usuario desde la base de datos
+    const userInfo = await usersRepo.getUserById(linkedAccount.userId, true);
+
     // Construir el objeto user con el ID de la base de datos
     req.user = {
       id: linkedAccount.userId, // ID de la base de datos
@@ -73,6 +80,8 @@ export const authenticate = async (
       phoneNumber: cognitoUserInfo.phoneNumber,
       phoneNumberVerified: cognitoUserInfo.phoneNumberVerified,
       groups: cognitoUserInfo.groups,
+      firstName: userInfo.firstName,
+      lastName: userInfo.lastName,
     };
 
     next();
@@ -103,6 +112,7 @@ export const optionalAuthenticate = async (
   const linkedAccountsRepo = container.resolve<LinkedAccountsRepository>(
     'linkedAccountsRepository'
   );
+  const usersRepo = container.resolve<UsersRepository>('usersRepository');
 
   try {
     const cognitoUserInfo = await authService.getUserInfo(token);
@@ -114,6 +124,9 @@ export const optionalAuthenticate = async (
     );
 
     if (linkedAccount) {
+      // Obtener información adicional del usuario desde la base de datos
+      const userInfo = await usersRepo.getUserById(linkedAccount.userId, true);
+
       req.user = {
         id: linkedAccount.userId,
         cognitoSub: cognitoUserInfo.userId,
@@ -123,6 +136,8 @@ export const optionalAuthenticate = async (
         phoneNumber: cognitoUserInfo.phoneNumber,
         phoneNumberVerified: cognitoUserInfo.phoneNumberVerified,
         groups: cognitoUserInfo.groups,
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
       };
     }
   } catch (error) {

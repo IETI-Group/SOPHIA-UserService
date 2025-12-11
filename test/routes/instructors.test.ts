@@ -46,6 +46,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',
@@ -92,6 +94,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'User',
+          last_name: 'Test',
           total_students: 0,
           total_courses: 0,
           average_rating: '0',
@@ -133,6 +137,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor456',
+          first_name: 'User',
+          last_name: 'Test2',
           total_students: 0,
           total_courses: 0,
           average_rating: '0',
@@ -156,6 +162,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor789',
+          first_name: 'User',
+          last_name: 'Test3',
           total_students: 0,
           total_courses: 0,
           average_rating: '0',
@@ -193,6 +201,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',
@@ -217,6 +227,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',

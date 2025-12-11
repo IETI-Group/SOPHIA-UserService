@@ -401,6 +401,8 @@ describe('Admin Routes Validation Tests', () => {
         success: true,
         message: 'Success',
         data: {
+          first_name: 'John',
+          last_name: 'Mack',
           id_instructor: 'instructor123',
           total_students: 100,
           total_courses: 5,

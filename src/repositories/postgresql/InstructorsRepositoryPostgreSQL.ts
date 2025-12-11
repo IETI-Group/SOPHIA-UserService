@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, gte, type SQL, sql } from 'drizzle-orm';
 import type { DBDrizzleProvider } from '../../db/index.js';
-import { instructors, VERIFICATION_STATUS } from '../../db/schema.js';
+import { instructors, users, VERIFICATION_STATUS } from '../../db/schema.js';
 import type { FiltersInstructor, PaginatedResponse } from '../../models/index.js';
 import type {
   InstructorInput,
@@ -87,7 +87,20 @@ export class InstructorsRepositoryPostgreSQL implements InstructorsRepository {
                 ? desc(instructors.average_rating)
                 : asc(instructors.average_rating);
 
-    const baseQuery = this.client.select().from(instructors);
+    const baseQuery = this.client
+      .select({
+        id_instructor: instructors.id_instructor,
+        first_name: users.first_name,
+        last_name: users.last_name,
+        total_students: instructors.total_students,
+        total_courses: instructors.total_courses,
+        average_rating: instructors.average_rating,
+        total_reviews: instructors.total_reviews,
+        verification_status: instructors.verification_status,
+        verified_at: instructors.verified_at,
+      })
+      .from(instructors)
+      .innerJoin(users, eq(instructors.id_instructor, users.id_user));
 
     const queryWithFilters =
       whereConditions.length > 0 ? baseQuery.where(and(...whereConditions)) : baseQuery;
@@ -126,8 +139,19 @@ export class InstructorsRepositoryPostgreSQL implements InstructorsRepository {
 
   public async getInstructor(instructorId: string): Promise<InstructorRecord> {
     const [instructor] = await this.client
-      .select()
+      .select({
+        id_instructor: instructors.id_instructor,
+        first_name: users.first_name,
+        last_name: users.last_name,
+        total_students: instructors.total_students,
+        total_courses: instructors.total_courses,
+        average_rating: instructors.average_rating,
+        total_reviews: instructors.total_reviews,
+        verification_status: instructors.verification_status,
+        verified_at: instructors.verified_at,
+      })
       .from(instructors)
+      .innerJoin(users, eq(instructors.id_instructor, users.id_user))
       .where(eq(instructors.id_instructor, instructorId))
       .limit(1);
 
@@ -203,7 +227,8 @@ export class InstructorsRepositoryPostgreSQL implements InstructorsRepository {
       throw new Error(`Instructor with id ${instructorId} not found`);
     }
 
-    return updatedInstructor;
+    // Fetch the complete instructor data with user info
+    return this.getInstructor(instructorId);
   }
 
   public async deleteInstructor(instructorId: string): Promise<void> {

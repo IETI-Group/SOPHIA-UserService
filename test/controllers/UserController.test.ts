@@ -38,18 +38,18 @@ describe('User Controller tests', () => {
         success: true,
         message: 'Users retrieved successfully',
         data: [
-          { userId: '1', role: ROLE.ADMIN },
-          { userId: '2', role: ROLE.INSTRUCTOR },
-          { userId: '3', role: ROLE.STUDENT },
-          { userId: '4', role: ROLE.STUDENT },
-          { userId: '5', role: ROLE.INSTRUCTOR },
-          { userId: '6', role: ROLE.STUDENT },
-          { userId: '7', role: ROLE.INSTRUCTOR },
-          { userId: '8', role: ROLE.STUDENT },
-          { userId: '9', role: ROLE.STUDENT },
-          { userId: '10', role: ROLE.INSTRUCTOR },
-          { userId: '11', role: ROLE.STUDENT },
-          { userId: '12', role: ROLE.STUDENT },
+          { userId: '1', role: ROLE.ADMIN, firstName: 'Admin', lastName: 'User' },
+          { userId: '2', role: ROLE.INSTRUCTOR, firstName: 'Instructor', lastName: 'User' },
+          { userId: '3', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
+          { userId: '4', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
+          { userId: '5', role: ROLE.INSTRUCTOR, firstName: 'Instructor', lastName: 'User' },
+          { userId: '6', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
+          { userId: '7', role: ROLE.INSTRUCTOR, firstName: 'Instructor', lastName: 'User' },
+          { userId: '8', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
+          { userId: '9', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
+          { userId: '10', role: ROLE.INSTRUCTOR, firstName: 'Instructor', lastName: 'User' },
+          { userId: '11', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
+          { userId: '12', role: ROLE.STUDENT, firstName: 'Student', lastName: 'User' },
         ],
         timestamp,
         pagination: {
@@ -116,6 +116,8 @@ describe('User Controller tests', () => {
       const mockUsers = Array.from({ length: 5 }, (_, i) => ({
         userId: (i + 1).toString(),
         role: ROLE.STUDENT,
+        firstName: `John${i + 1}`,
+        lastName: `Doe${i + 1}`,
       }));
 
       userService.getUsers.mockResolvedValue({
@@ -175,7 +177,7 @@ describe('User Controller tests', () => {
     it('should return a user by ID', async () => {
       const userId = '12345';
       const lightDTO = true;
-      const mockUser = { userId, role: ROLE.INSTRUCTOR };
+      const mockUser = { userId, role: ROLE.INSTRUCTOR, firstName: 'Raul', lastName: 'Aguirre' };
       userService.getUserById.mockResolvedValue(mockUser);
 
       const result = await userController.getUserById(userId, lightDTO);
@@ -197,7 +199,7 @@ describe('User Controller tests', () => {
         birthDate: new Date('1995-05-15'),
       };
 
-      const createdUser = { userId: '1', role: ROLE.STUDENT };
+      const createdUser = { userId: '1', role: ROLE.STUDENT, firstName: 'Jane', lastName: 'Doe' };
       userService.postUser.mockResolvedValue(createdUser);
 
       const result = await userController.postUser(userDTO);
@@ -222,7 +224,12 @@ describe('User Controller tests', () => {
         lastName: 'UpdatedLastName',
       } as Partial<UserUpdateDTO>;
 
-      const updatedUser = { userId, role: ROLE.INSTRUCTOR };
+      const updatedUser = {
+        userId,
+        role: ROLE.INSTRUCTOR,
+        firstName: 'UpdatedName',
+        lastName: 'UpdatedLastName',
+      };
       userService.updateUser.mockResolvedValue(updatedUser);
 
       const result = await userController.updateUser(userId, userUpdateDTO);
@@ -259,7 +266,12 @@ describe('User Controller tests', () => {
     it('should return a user by email', async () => {
       const email = 'test@example.com';
       const lightDTO = true;
-      const mockUser = { userId: '12345', role: ROLE.INSTRUCTOR };
+      const mockUser = {
+        userId: '12345',
+        role: ROLE.INSTRUCTOR,
+        firstName: 'Raul',
+        lastName: 'Aguirre',
+      };
       userService.getUserByEmail.mockResolvedValue(mockUser);
 
       const result = await userController.getUserByEmail(email, lightDTO);
@@ -731,7 +743,12 @@ describe('User Controller tests', () => {
         lightDTO: true,
       };
       const timestamp = new Date().toISOString();
-      const mockUsers = userIds.map((id) => ({ userId: id, role: ROLE.STUDENT }));
+      const mockUsers = userIds.map((id) => ({
+        userId: id,
+        role: ROLE.STUDENT,
+        firstName: 'Test',
+        lastName: 'User',
+      }));
 
       userService.getUsersByIds.mockResolvedValue({
         success: true,
