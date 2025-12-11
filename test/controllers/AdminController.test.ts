@@ -357,6 +357,8 @@ describe('Admin Controller tests', () => {
       const mockInstructors: InstructorRecord[] = [
         {
           id_instructor: 'instructor1',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.75',
@@ -426,6 +428,8 @@ describe('Admin Controller tests', () => {
         verifiedAt: new Date(),
       };
       const mockInstructor: InstructorRecord = {
+        first_name: 'John',
+        last_name: 'Doe',
         id_instructor: instructorId,
         total_students: 100,
         total_courses: 5,

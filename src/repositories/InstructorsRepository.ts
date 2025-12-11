@@ -5,6 +5,8 @@ import type { PaginatedResponse } from '../models/index.js';
 // Types based on DB schema
 export type InstructorRecord = {
   id_instructor: string;
+  first_name: string;
+  last_name: string;
   total_students: number;
   total_courses: number;
   average_rating: string; // decimal in DB

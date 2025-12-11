@@ -1,3 +1,5 @@
+import type FiltersInstructor from '../../models/filters/FiltersInstructor.js';
+import type { PaginatedResponse } from '../../models/index.js';
 import type {
   InstructorInput,
   InstructorRecord,
@@ -10,6 +12,16 @@ export default class InstructorServiceImpl implements InstructorService {
 
   constructor(instructorsRepository: InstructorsRepository) {
     this.instructorsRepository = instructorsRepository;
+  }
+
+  public async getInstructors(
+    page: number,
+    size: number,
+    sort: string | undefined,
+    order: 'asc' | 'desc',
+    filters: FiltersInstructor
+  ): Promise<PaginatedResponse<InstructorRecord>> {
+    return this.instructorsRepository.getInstructors(page, size, filters, sort, order);
   }
 
   public async getInstructor(instructorId: string): Promise<InstructorRecord> {

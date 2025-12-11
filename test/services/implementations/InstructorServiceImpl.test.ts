@@ -21,6 +21,8 @@ describe('InstructorServiceImpl tests', () => {
       const instructorId = 'instructor123';
       const mockInstructor: InstructorRecord = {
         id_instructor: instructorId,
+        first_name: 'John',
+        last_name: 'Doe',
         total_students: 100,
         total_courses: 5,
         average_rating: '4.75',
@@ -65,6 +67,8 @@ describe('InstructorServiceImpl tests', () => {
         verifiedAt: new Date(),
       };
       const mockInstructor: InstructorRecord = {
+        first_name: 'John',
+        last_name: 'Doe',
         id_instructor: instructorId,
         total_students: 100,
         total_courses: 5,

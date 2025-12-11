@@ -46,6 +46,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',
@@ -61,10 +63,27 @@ describe('Instructors Routes Validation Tests', () => {
       expect(response.status).toBe(200);
     });
 
-    it('should reject empty instructor ID', async () => {
+    it('should return list of instructors when no ID is provided', async () => {
+      // Mock para el método getInstructors del controlador
+      instructorController.getInstructors.mockResolvedValue({
+        success: true,
+        message: 'Instructors retrieved successfully',
+        data: [],
+        timestamp: new Date().toISOString(),
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      });
+
       const response = await request(app).get('/api/v1/instructors/');
 
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
     });
   });
 
@@ -75,6 +94,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'User',
+          last_name: 'Test',
           total_students: 0,
           total_courses: 0,
           average_rating: '0',
@@ -116,6 +137,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor456',
+          first_name: 'User',
+          last_name: 'Test2',
           total_students: 0,
           total_courses: 0,
           average_rating: '0',
@@ -139,6 +162,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor789',
+          first_name: 'User',
+          last_name: 'Test3',
           total_students: 0,
           total_courses: 0,
           average_rating: '0',
@@ -176,6 +201,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',
@@ -200,6 +227,8 @@ describe('Instructors Routes Validation Tests', () => {
         message: 'Success',
         data: {
           id_instructor: 'instructor123',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',

@@ -71,7 +71,7 @@ export const stringParam = (
   message: string,
   optional: boolean = false
 ): ValidationChain => {
-  return param(pathVariable).isString().withMessage(message).optional(optional);
+  return param(pathVariable).notEmpty().withMessage(message).optional(optional);
 };
 
 export const emailParam = (

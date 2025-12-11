@@ -53,7 +53,7 @@ describe('User Service Implementation', () => {
       const mockResponse = {
         success: true,
         message: 'Users retrieved successfully',
-        data: [{ userId: '1', role: ROLE.STUDENT }],
+        data: [{ userId: '1', role: ROLE.STUDENT, firstName: 'Alice', lastName: 'Smith' }],
         timestamp: new Date().toISOString(),
         pagination: {
           page: 1,
@@ -115,7 +115,7 @@ describe('User Service Implementation', () => {
     it('should call repository getUserById with correct parameters', async () => {
       const userId = '12345';
       const lightDTO = true;
-      const mockUser = { userId, role: ROLE.STUDENT };
+      const mockUser = { userId, role: ROLE.STUDENT, firstName: 'Alice', lastName: 'Smith' };
 
       userRepository.getUserById.mockResolvedValue(mockUser);
 
@@ -150,7 +150,12 @@ describe('User Service Implementation', () => {
     it('should call repository getUserByEmail with correct parameters', async () => {
       const email = 'test@example.com';
       const lightDTO = true;
-      const mockUser = { userId: '12345', role: ROLE.STUDENT };
+      const mockUser = {
+        userId: '12345',
+        role: ROLE.STUDENT,
+        firstName: 'Alice',
+        lastName: 'Smith',
+      };
 
       userRepository.getUserByEmail.mockResolvedValue(mockUser);
 
@@ -173,9 +178,9 @@ describe('User Service Implementation', () => {
         success: true,
         message: 'Users retrieved successfully',
         data: [
-          { userId: '1', role: ROLE.STUDENT },
-          { userId: '2', role: ROLE.INSTRUCTOR },
-          { userId: '3', role: ROLE.ADMIN },
+          { userId: '1', role: ROLE.STUDENT, firstName: 'Alice', lastName: 'Smith' },
+          { userId: '2', role: ROLE.INSTRUCTOR, firstName: 'Bob', lastName: 'Johnson' },
+          { userId: '3', role: ROLE.ADMIN, firstName: 'Charlie', lastName: 'Brown' },
         ],
         timestamp: new Date().toISOString(),
         pagination: {
@@ -203,7 +208,7 @@ describe('User Service Implementation', () => {
       const mockResponse = {
         success: true,
         message: 'Users retrieved successfully',
-        data: [{ userId: '1', role: ROLE.STUDENT }],
+        data: [{ userId: '1', role: ROLE.STUDENT, firstName: 'Alice', lastName: 'Smith' }],
         timestamp: new Date().toISOString(),
         pagination: {
           page: 1,
@@ -237,7 +242,12 @@ describe('User Service Implementation', () => {
         birthDate: new Date('1995-05-15'),
       };
 
-      const mockCreatedUser = { userId: '12345', role: ROLE.STUDENT };
+      const mockCreatedUser = {
+        userId: '12345',
+        role: ROLE.STUDENT,
+        firstName: 'Jane',
+        lastName: 'Doe',
+      };
 
       userRepository.postUser.mockResolvedValue(mockCreatedUser);
 
@@ -257,7 +267,12 @@ describe('User Service Implementation', () => {
         bio: 'Updated bio',
       };
 
-      const mockUpdatedUser = { userId, role: ROLE.INSTRUCTOR };
+      const mockUpdatedUser = {
+        userId,
+        role: ROLE.INSTRUCTOR,
+        firstName: 'UpdatedName',
+        lastName: 'OriginalLastName',
+      };
 
       userRepository.updateUser.mockResolvedValue(mockUpdatedUser);
 
