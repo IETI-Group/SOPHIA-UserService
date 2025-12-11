@@ -9,10 +9,10 @@ import userRoutes from './users.js';
 const router: IRouter = Router();
 router.use('/health', healthRoutes);
 router.use('/auth', auth);
+router.use('/instructors', instructorRoutes); // Public routes
 router.use(authenticate);
 // Rutas de la aplicación
 router.use('/users', userRoutes);
 router.use('/admin', adminRoutes);
-router.use('/instructors', instructorRoutes);
 
 export default router;
