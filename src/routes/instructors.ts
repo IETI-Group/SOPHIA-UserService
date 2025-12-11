@@ -2,6 +2,7 @@ import { type IRouter, type Request, type Response, Router } from 'express';
 import { validationResult } from 'express-validator';
 import container from '../config/diContainer.js';
 import type InstructorController from '../controllers/InstructorController.js';
+import type { VERIFICATION_STATUS } from '../db/schema.js';
 import type { InstructorInput } from '../repositories/index.js';
 import {
   parseInstructorInBody,
@@ -50,7 +51,7 @@ router.get(
     }
 
     const { page, size, sort, order } = parsePaginationQuery(req);
-    const verificationStatus = req.query.verification_status as string;
+    const verificationStatus = req.query.verification_status as VERIFICATION_STATUS | undefined;
     const instructors = await instructorController.getInstructors(
       page,
       size,
