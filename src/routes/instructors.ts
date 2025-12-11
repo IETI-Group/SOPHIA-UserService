@@ -50,7 +50,7 @@ router.get(
     }
 
     const { page, size, sort, order } = parsePaginationQuery(req);
-    const verificationStatus = req.query.verification_status as any;
+    const verificationStatus = req.query.verification_status as string;
     const instructors = await instructorController.getInstructors(
       page,
       size,
