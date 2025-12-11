@@ -113,7 +113,7 @@ Registra un nuevo usuario en la base de datos y en AWS Cognito.
 }
 ```
 
-**Validaciones:**
+**Validaciones:**a
 - `firstName`: String requerido, no vacío
 - `lastName`: String requerido, no vacío
 - `email`: Email válido, requerido
@@ -836,23 +836,25 @@ Crea una nueva review.
 **Path Parameters:**
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
-| id | string | ID del reviewer |
+| id | string | ID del reviewer (usuario que hace la review) |
 
 **Request Body:**
 ```json
 {
   "reviewedId": "uuid-instructor-o-curso",
-  "reviewType": "instructor",
-  "rating": 5,
-  "comment": "Excelente experiencia de aprendizaje"
+  "discriminant": "instructor",
+  "rate": 5,
+  "comments": "Excelente experiencia de aprendizaje",
+  "recommended": true
 }
 ```
 
 **Validaciones:**
-- `reviewedId`: String requerido
-- `reviewType`: Enum requerido: instructor, course
-- `rating`: Number requerido, 1-5
-- `comment`: String (opcional)
+- `reviewedId`: String requerido (UUID del instructor o curso a evaluar)
+- `discriminant`: Enum requerido: `instructor`, `course`
+- `rate`: Integer requerido, 1-5
+- `comments`: String (opcional)
+- `recommended`: Boolean requerido
 
 **Respuesta (201):**
 ```json
@@ -875,13 +877,19 @@ Actualiza una review existente.
 | id | string | ID del usuario |
 | reviewId | string | ID de la review |
 
-**Request Body:** (Campos opcionales)
+**Request Body:** (Todos los campos opcionales)
 ```json
 {
-  "rating": 4,
-  "comment": "Comentario actualizado"
+  "rate": 4,
+  "comments": "Comentario actualizado",
+  "recommended": false
 }
 ```
+
+**Validaciones:**
+- `rate`: Integer opcional, 1-5
+- `comments`: String opcional
+- `recommended`: Boolean opcional
 
 **Respuesta (200):**
 ```json

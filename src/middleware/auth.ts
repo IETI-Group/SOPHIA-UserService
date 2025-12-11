@@ -47,7 +47,7 @@ export const authenticate = async (
     const linkedAccountsRepo = container.resolve<LinkedAccountsRepository>(
       'linkedAccountsRepository'
     );
-    const usersRepo = container.resolve<UsersRepository>('usersRepository');
+    const usersRepo = container.resolve<UsersRepository>('userRepository');
 
     const cognitoUserInfo = await authService.getUserInfo(token);
 
