@@ -90,7 +90,7 @@ describe('Users Routes Validation Tests', () => {
       userController.getUserById.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: { userId: '123', role: ROLE.STUDENT, firstName: 'Allan', lastName: 'Doe' },
         timestamp: new Date().toISOString(),
       });
 
@@ -103,7 +103,7 @@ describe('Users Routes Validation Tests', () => {
       userController.getUserById.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: { userId: '123', role: ROLE.STUDENT, firstName: 'Alice', lastName: 'Smith' },
         timestamp: new Date().toISOString(),
       });
 
@@ -120,7 +120,7 @@ describe('Users Routes Validation Tests', () => {
       userController.getUserByEmail.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: { userId: '123', role: ROLE.STUDENT, firstName: 'Alice', lastName: 'Smith' },
         timestamp: new Date().toISOString(),
       });
 
@@ -179,7 +179,7 @@ describe('Users Routes Validation Tests', () => {
       userController.postUser.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: { userId: '123', role: ROLE.STUDENT, firstName: 'John', lastName: 'Doe' },
         timestamp: new Date().toISOString(),
       });
 
@@ -266,7 +266,12 @@ describe('Users Routes Validation Tests', () => {
       userController.updateUser.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: {
+          userId: '123',
+          role: ROLE.STUDENT,
+          firstName: 'UpdatedName',
+          lastName: 'UpdatedLastName',
+        },
         timestamp: new Date().toISOString(),
       });
 
@@ -677,7 +682,12 @@ describe('Users Routes Validation Tests', () => {
       userController.getUserById.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: {
+          userId: '<script>alert("xss")</script>',
+          role: ROLE.STUDENT,
+          firstName: '<script>alert("xss")</script>',
+          lastName: 'Doe',
+        },
         timestamp: new Date().toISOString(),
       });
 
@@ -692,7 +702,12 @@ describe('Users Routes Validation Tests', () => {
       userController.postUser.mockResolvedValue({
         success: true,
         message: 'Success',
-        data: { userId: '123', role: ROLE.STUDENT },
+        data: {
+          userId: '123',
+          role: ROLE.STUDENT,
+          firstName: '<script>alert("xss")</script>',
+          lastName: 'Doe',
+        },
         timestamp: new Date().toISOString(),
       });
 

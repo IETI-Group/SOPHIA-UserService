@@ -18,16 +18,20 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
     it('should return paginated instructors without filters', async () => {
       const instructorsMockData = [
         {
-          id_instructor: 'instructor1',
-          total_students: 100,
-          total_courses: 5,
-          average_rating: '4.5',
-          total_reviews: 50,
+          id_instructor: 'instructor11',
+          first_name: 'Instructor',
+          last_name: 'Eleven',
+          total_students: 110,
+          total_courses: 6,
+          average_rating: '4.6',
+          total_reviews: 55,
           verification_status: VERIFICATION_STATUS.VERIFIED,
-          verified_at: new Date('2024-01-01'),
+          verified_at: new Date('2024-01-11'),
         },
         {
           id_instructor: 'instructor2',
+          first_name: 'Jane',
+          last_name: 'Smith',
           total_students: 200,
           total_courses: 10,
           average_rating: '4.8',
@@ -43,8 +47,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
           offset: vi.fn().mockResolvedValue(instructorsMockData),
         }),
       };
-      const fromMock = {
+      const innerJoinMock = {
         orderBy: vi.fn().mockReturnValue(orderByMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       const countFromMock = vi.fn().mockResolvedValue(countMockData);
@@ -77,6 +84,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       const instructorsMockData = [
         {
           id_instructor: 'instructor1',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 150,
           total_courses: 8,
           average_rating: '4.7',
@@ -95,8 +104,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       const whereMock = {
         orderBy: vi.fn().mockReturnValue(orderByMock),
       };
-      const fromMock = {
+      const innerJoinMock = {
         where: vi.fn().mockReturnValue(whereMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       const countWhereMock = vi.fn().mockResolvedValue(countMockData);
@@ -132,6 +144,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       const instructorsMockData = [
         {
           id_instructor: 'instructor2',
+          first_name: 'Jane',
+          last_name: 'Smith',
           total_students: 200,
           total_courses: 10,
           average_rating: '4.8',
@@ -141,6 +155,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
         },
         {
           id_instructor: 'instructor1',
+          first_name: 'John',
+          last_name: 'Doe',
           total_students: 100,
           total_courses: 5,
           average_rating: '4.5',
@@ -156,8 +172,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
           offset: vi.fn().mockResolvedValue(instructorsMockData),
         }),
       };
-      const fromMock = {
+      const innerJoinMock = {
         orderBy: vi.fn().mockReturnValue(orderByMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       const countFromMock = vi.fn().mockResolvedValue(countMockData);
@@ -183,6 +202,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       const instructorsMockData = [
         {
           id_instructor: 'instructor11',
+          first_name: 'Instructor',
+          last_name: 'Eleven',
           total_students: 50,
           total_courses: 3,
           average_rating: '4.2',
@@ -198,8 +219,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
           offset: vi.fn().mockResolvedValue(instructorsMockData),
         }),
       };
-      const fromMock = {
+      const innerJoinMock = {
         orderBy: vi.fn().mockReturnValue(orderByMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       const countFromMock = vi.fn().mockResolvedValue(countMockData);
@@ -234,8 +258,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
           offset: vi.fn().mockResolvedValue([]),
         }),
       };
-      const fromMock = {
+      const innerJoinMock = {
         orderBy: vi.fn().mockReturnValue(orderByMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       const countFromMock = vi.fn().mockResolvedValue(countMockData);
@@ -261,6 +288,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
     it('should return instructor by id', async () => {
       const instructorMockData = {
         id_instructor: 'instructor1',
+        first_name: 'John',
+        last_name: 'Doe',
         total_students: 100,
         total_courses: 5,
         average_rating: '4.5',
@@ -273,8 +302,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       const whereMock = {
         limit: limitMock,
       };
-      const fromMock = {
+      const innerJoinMock = {
         where: vi.fn().mockReturnValue(whereMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       drizzleClient.select.mockReturnValue({
@@ -293,8 +325,11 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
       const whereMock = {
         limit: limitMock,
       };
-      const fromMock = {
+      const innerJoinMock = {
         where: vi.fn().mockReturnValue(whereMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
       };
 
       drizzleClient.select.mockReturnValue({
@@ -408,6 +443,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
     it('should update instructor verification status', async () => {
       const updatedInstructor = {
         id_instructor: 'instructor1',
+        first_name: 'John',
+        last_name: 'Doe',
         total_students: 100,
         total_courses: 5,
         average_rating: '4.5',
@@ -416,16 +453,32 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
         verified_at: new Date('2024-01-10'),
       };
 
-      const whereMock = {
+      const updateWhereMock = {
         returning: vi.fn().mockResolvedValue([updatedInstructor]),
       };
       const setMock = {
-        where: vi.fn().mockReturnValue(whereMock),
+        where: vi.fn().mockReturnValue(updateWhereMock),
       };
 
       drizzleClient.update.mockReturnValue({
         set: vi.fn().mockReturnValue(setMock),
       } as unknown as ReturnType<typeof drizzleClient.update>);
+
+      // Mock para getInstructor que se llama después del update
+      const limitMock = vi.fn().mockResolvedValue([updatedInstructor]);
+      const whereMock = {
+        limit: limitMock,
+      };
+      const innerJoinMock = {
+        where: vi.fn().mockReturnValue(whereMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+      };
+
+      drizzleClient.select.mockReturnValue({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
 
       const result = await repository.updateInstructor('instructor1', {
         verificationStatus: VERIFICATION_STATUS.VERIFIED,
@@ -439,6 +492,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
     it('should update instructor to rejected status', async () => {
       const updatedInstructor = {
         id_instructor: 'instructor2',
+        first_name: 'Jane',
+        last_name: 'Smith',
         total_students: 0,
         total_courses: 0,
         average_rating: '0',
@@ -447,16 +502,32 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
         verified_at: null,
       };
 
-      const whereMock = {
+      const updateWhereMock = {
         returning: vi.fn().mockResolvedValue([updatedInstructor]),
       };
       const setMock = {
-        where: vi.fn().mockReturnValue(whereMock),
+        where: vi.fn().mockReturnValue(updateWhereMock),
       };
 
       drizzleClient.update.mockReturnValue({
         set: vi.fn().mockReturnValue(setMock),
       } as unknown as ReturnType<typeof drizzleClient.update>);
+
+      // Mock para getInstructor que se llama después del update
+      const limitMock = vi.fn().mockResolvedValue([updatedInstructor]);
+      const whereMock = {
+        limit: limitMock,
+      };
+      const innerJoinMock = {
+        where: vi.fn().mockReturnValue(whereMock),
+      };
+      const fromMock = {
+        innerJoin: vi.fn().mockReturnValue(innerJoinMock),
+      };
+
+      drizzleClient.select.mockReturnValue({
+        from: vi.fn().mockReturnValue(fromMock),
+      } as unknown as ReturnType<typeof drizzleClient.select>);
 
       const result = await repository.updateInstructor('instructor2', {
         verificationStatus: VERIFICATION_STATUS.REJECTED,
@@ -501,6 +572,8 @@ describe('InstructorsRepositoryPostgreSQL tests', () => {
     it('should delete instructor by id', async () => {
       const deletedInstructor = {
         id_instructor: 'instructor1',
+        first_name: 'John',
+        last_name: 'Doe',
         total_students: 100,
         total_courses: 5,
         average_rating: '4.5',
